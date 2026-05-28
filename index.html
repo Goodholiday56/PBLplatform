@@ -1,0 +1,3764 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>人机共跑 — 跨学科PBL教学平台</title>
+<link rel="stylesheet" href="/lib/leaflet.css">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg:            #fafafa;
+    --bg-card:       #ffffff;
+    --bg-subtle:     #f5f5f5;
+    --bg-hover:      #f0f0f0;
+    --border:        #e5e5e5;
+    --border-light:  #f0f0f0;
+    --text:          #1a1a1a;
+    --text-secondary:#6b6b6b;
+    --text-tertiary: #999999;
+    --accent:        #1a56db;
+    --accent-light:  #e8f0fe;
+    --accent-hover:  #1547b5;
+    --green:         #0d9488;
+    --green-light:   #e6f7f5;
+    --orange:        #ea5a0c;
+    --orange-light:  #fef3eb;
+    --shadow-sm:     0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md:     0 4px 12px rgba(0,0,0,0.06);
+    --shadow-lg:     0 12px 40px rgba(0,0,0,0.08);
+    --radius:        10px;
+    --radius-sm:     6px;
+    --radius-lg:     14px;
+    --transition:    0.2s ease;
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Subtle tech background texture ── */
+  .bg-texture {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.35;
+    background-image:
+      linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px),
+      radial-gradient(circle, rgba(26,86,219,0.08) 1px, transparent 1px);
+    background-size: 48px 48px, 48px 48px, 96px 96px;
+  }
+  .bg-texture::after {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      radial-gradient(circle, rgba(26,86,219,0.12) 1.5px, transparent 1.5px),
+      radial-gradient(circle, rgba(109,40,217,0.1) 1px, transparent 1px);
+    background-size: 240px 160px, 180px 220px;
+    background-position: 0 0, 40px 30px;
+    animation: grid-drift 20s linear infinite;
+  }
+  @keyframes grid-drift {
+    0% { background-position: 0 0, 40px 30px; }
+    100% { background-position: 240px 160px, 220px 250px; }
+  }
+
+  .container { position: relative; z-index: 1; max-width: 1160px; margin: 0 auto; padding: 0 28px; }
+
+  /* ── Navbar ── */
+  .navbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    height: 56px; background: rgba(250,250,250,0.85);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center;
+  }
+  .navbar .container {
+    display: flex; align-items: center; justify-content: space-between; width: 100%;
+  }
+  .nav-left { display: flex; align-items: center; gap: 32px; }
+  .nav-logo {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 17px; font-weight: 700; color: var(--text);
+    text-decoration: none; letter-spacing: -0.3px; cursor: pointer;
+  }
+  .nav-logo .logo-mark {
+    width: 28px; height: 28px; background: var(--text); border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .logo-mark::before {
+    content: '';
+    width: 8px; height: 8px;
+    border: 2px solid #fff; border-radius: 2px;
+  }
+  .logo-mark::after {
+    content: '';
+    position: absolute; bottom: 5px; right: 5px;
+    width: 4px; height: 4px;
+    background: #fff; border-radius: 1px;
+    opacity: 0.7;
+  }
+  .nav-links { display: flex; gap: 6px; list-style: none; }
+  .nav-links a {
+    padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 500;
+    color: var(--text-secondary); text-decoration: none; transition: var(--transition);
+    cursor: pointer;
+  }
+  .nav-links a:hover, .nav-links a.active {
+    color: var(--text); background: var(--bg-subtle);
+  }
+  .nav-right { display: flex; align-items: center; gap: 12px; }
+  .nav-search {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--bg-subtle); border: 1px solid transparent;
+    border-radius: 8px; padding: 7px 12px; width: 220px;
+    transition: var(--transition); font-size: 13px;
+  }
+  .nav-search:focus-within {
+    background: var(--bg-card); border-color: var(--border);
+    box-shadow: var(--shadow-sm); width: 280px;
+  }
+  .nav-search input {
+    background: none; border: none; color: var(--text); font-size: 13px;
+    outline: none; width: 100%; font-family: inherit;
+  }
+  .nav-search input::placeholder { color: var(--text-tertiary); }
+  .nav-search svg { flex-shrink: 0; color: var(--text-tertiary); }
+  .nav-avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--text); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    padding: 120px 0 64px;
+    display: grid; grid-template-columns: 1fr 380px; gap: 64px; align-items: center;
+  }
+  .hero-text .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12px; font-weight: 600; color: var(--accent);
+    letter-spacing: 0.5px; margin-bottom: 12px;
+  }
+  .hero-text .eyebrow::before {
+    content: ''; width: 18px; height: 1.5px; background: var(--accent); opacity: 0.5;
+  }
+  .hero-text h1 {
+    font-size: clamp(30px, 4vw, 40px); font-weight: 700;
+    letter-spacing: -1px; line-height: 1.25; margin-bottom: 16px; color: var(--text);
+  }
+  .hero-text .accent {
+    color: var(--accent);
+    position: relative;
+  }
+  .hero-text .accent::after {
+    content: '';
+    position: absolute; bottom: 2px; left: 0; right: 0; height: 3px;
+    background: var(--accent); opacity: 0.15; border-radius: 2px;
+  }
+  .hero-text p {
+    font-size: 15px; color: var(--text-secondary); max-width: 460px; line-height: 1.7;
+    margin-bottom: 28px;
+  }
+  .hero-actions { display: flex; gap: 10px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 10px 22px; border-radius: 8px; font-size: 14px; font-weight: 600;
+    cursor: pointer; border: none; font-family: inherit; text-decoration: none;
+    transition: var(--transition); white-space: nowrap;
+  }
+  .btn-primary {
+    background: var(--text); color: #fff;
+    position: relative; overflow: hidden;
+  }
+  .btn-primary::after {
+    content: ' →'; display: inline-block;
+    transition: transform 0.2s ease;
+  }
+  .btn-primary:hover { background: #333; }
+  .btn-primary:hover::after { transform: translateX(3px); }
+  .btn-outline {
+    background: transparent; color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-outline:hover { background: var(--bg-subtle); }
+
+  /* ── Hero visual (tech abstract) ── */
+  .hero-geo {
+    width: 100%; aspect-ratio: 1; position: relative;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .geo-block {
+    position: absolute; border-radius: 16px;
+    transition: transform 0.3s ease;
+  }
+  .geo-b1 {
+    width: 72%; height: 72%;
+    background: linear-gradient(135deg, #f0f4ff 0%, #fafafa 100%);
+    border: 1px solid var(--border-light);
+    animation: geo-float 8s ease-in-out infinite;
+  }
+  .geo-b1::after {
+    content: '';
+    position: absolute; inset: 8px;
+    border: 1px dashed rgba(26,86,219,0.1);
+    border-radius: 12px;
+  }
+  .geo-b2 {
+    width: 50%; height: 50%; top: 12%; left: 12%;
+    background: #fff;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-md);
+    animation: geo-float 7s ease-in-out infinite 1.5s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .geo-b3 {
+    width: 28%; height: 28%; bottom: 14%; right: 10%;
+    background: var(--accent-light);
+    border-radius: 12px;
+    animation: geo-float 6s ease-in-out infinite 3s;
+  }
+  /* connecting lines between blocks */
+  .geo-line {
+    position: absolute; pointer-events: none;
+  }
+  .geo-line-h {
+    top: 30%; left: 5%; width: 90%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(26,86,219,0.12) 30%, rgba(26,86,219,0.12) 70%, transparent);
+    animation: geo-line-pulse 4s ease-in-out infinite;
+  }
+  .geo-line-v {
+    top: 8%; left: 55%; width: 1px; height: 80%;
+    background: linear-gradient(0deg, transparent, rgba(26,86,219,0.1) 30%, rgba(26,86,219,0.1) 70%, transparent);
+    animation: geo-line-pulse 4s ease-in-out infinite 2s;
+  }
+  .geo-node {
+    position: absolute; width: 5px; height: 5px;
+    background: var(--accent); border-radius: 50%;
+    box-shadow: 0 0 8px rgba(26,86,219,0.3);
+    animation: geo-pulse 4s ease-in-out infinite;
+  }
+  .geo-node.n1 { top: 30%; left: 55%; animation-delay: 0s; }
+  .geo-node.n2 { bottom: 26%; right: 24%; animation-delay: 1.5s; }
+  .geo-node.n3 { top: 18%; left: 30%; animation-delay: 3s; width: 4px; height: 4px; }
+  @keyframes geo-line-pulse {
+    0%, 100% { opacity: 0.4; }
+    50%      { opacity: 1; }
+  }
+  /* dots pattern inside b2 */
+  .geo-dots {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 16px;
+  }
+  .geo-dots span {
+    width: 10px; height: 10px; border-radius: 3px; display: block;
+  }
+  .geo-dots span:nth-child(1) { background: var(--accent); }
+  .geo-dots span:nth-child(2) { background: var(--border); }
+  .geo-dots span:nth-child(3) { background: var(--border-light); }
+  .geo-dots span:nth-child(4) { background: var(--border); }
+  .geo-dots span:nth-child(5) { background: var(--accent); animation: geo-pulse 3s ease-in-out infinite; }
+  .geo-dots span:nth-child(6) { background: var(--border-light); }
+  .geo-dots span:nth-child(7) { background: var(--border-light); }
+  .geo-dots span:nth-child(8) { background: var(--border); }
+  .geo-dots span:nth-child(9) { background: var(--accent-light); }
+
+  @keyframes geo-float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-6px); }
+  }
+  @keyframes geo-pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50%      { transform: scale(1.3); opacity: 0.5; }
+  }
+  @keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fade-in-scale {
+    from { opacity: 0; transform: scale(0.96) translateY(8px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  /* ── Card entrance stagger ── */
+  .course-card {
+    opacity: 0; transform: translateY(16px);
+    animation: fade-in-up 0.45s ease forwards;
+  }
+
+  /* ── Category bar ── */
+  .cat-bar {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 40px; padding-bottom: 32px;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .cat-pill {
+    padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 500;
+    color: var(--text-secondary); cursor: pointer; transition: var(--transition);
+    background: transparent; border: none; font-family: inherit;
+  }
+  .cat-pill:hover { color: var(--text); background: var(--bg-subtle); }
+  .cat-pill.active {
+    color: var(--accent); background: var(--accent-light); font-weight: 600;
+  }
+
+  /* ── Section header ── */
+  .section-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .section-head h2 { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+  .section-head span { font-size: 13px; color: var(--text-tertiary); }
+
+  /* ── Course grid ── */
+  .course-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
+    gap: 16px;
+  }
+  .course-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: 20px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .course-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 4px 20px rgba(26,86,219,0.08), 0 0 0 1px rgba(26,86,219,0.06);
+    transform: translateY(-2px);
+  }
+
+  /* Thumbnail — pure CSS geometric */
+  .card-thumb {
+    height: 52px; border-radius: var(--radius-sm);
+    display: flex; align-items: center; padding: 0 16px;
+    font-size: 13px; font-weight: 600; letter-spacing: -0.2px;
+    position: relative; overflow: hidden;
+  }
+  .card-thumb::after {
+    content: '';
+    position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+    transition: transform 0.35s ease, opacity 0.35s ease;
+  }
+  .course-card:hover .card-thumb::after {
+    transform: translateY(-50%) scale(1.15);
+    opacity: 0.8;
+  }
+  /* Thumb themes — tech geometric per module */
+  .thumb-urban  { background: linear-gradient(135deg, #e8f0fe 0%, #f0f4ff 100%); color: #1a56db; }
+  .thumb-urban::after  {
+    width: 28px; height: 28px;
+    border: 2px solid #1a56db33; border-radius: 2px;
+    box-shadow: inset 0 0 0 6px #fff, inset 0 0 0 8px #1a56db22;
+  }
+  .thumb-robot  { background: linear-gradient(135deg, #f3eeff 0%, #f8f5ff 100%); color: #6d28d9; }
+  .thumb-robot::after  {
+    width: 22px; height: 22px;
+    border: 2px solid #6d28d933;
+    transform: translateY(-50%) rotate(45deg);
+    border-radius: 3px;
+    box-shadow: 2px 2px 0 #6d28d918, -2px -2px 0 #6d28d918;
+  }
+  .thumb-data   { background: linear-gradient(135deg, #fff7ed 0%, #fffbf6 100%); color: #ea5a0c; }
+  .thumb-data::after   {
+    width: 8px; height: 24px;
+    border: 2px solid #ea5a0c33;
+    border-bottom: none; border-radius: 0;
+    box-shadow: 8px -6px 0 #ea5a0c22, 16px -12px 0 #ea5a0c15;
+  }
+  .thumb-media  { background: linear-gradient(135deg, #ecfdf7 0%, #f4fefb 100%); color: #0d9488; }
+  .thumb-media::after  {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    border: 2px solid #0d948833;
+    background: radial-gradient(circle at 30% 30%, #0d948822 2px, transparent 2px),
+                radial-gradient(circle at 60% 70%, #0d948818 3px, transparent 3px);
+  }
+
+  .card-tag {
+    display: inline-flex; align-self: flex-start;
+    padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;
+  }
+  .tag-m1  { background: #e8f0fe; color: #1a56db; }
+  .tag-m2  { background: #f3e8ff; color: #6d28d9; }
+  .tag-m3  { background: #fff7ed; color: #ea5a0c; }
+  .tag-m4  { background: #e6f7f5; color: #0d9488; }
+
+  .card-title {
+    font-size: 14px; font-weight: 600; line-height: 1.45;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .card-meta { font-size: 12px; color: var(--text-tertiary); }
+  .card-meta span { margin-right: 10px; }
+  .card-bottom {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 10px; border-top: 1px solid var(--border-light);
+    font-size: 12px;
+  }
+  .card-bottom .lessons { font-weight: 700; color: var(--text); }
+  .card-bottom .students { color: var(--text-tertiary); }
+
+  /* ── Empty state ── */
+  .empty-state {
+    grid-column: 1/-1; text-align: center; padding: 64px 0; color: var(--text-tertiary);
+  }
+  .empty-state .empty-icon {
+    width: 48px; height: 48px; margin: 0 auto 16px;
+    border: 2px dashed var(--border); border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.3); backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: auto; }
+  .modal-overlay.open .modal {
+    animation: fade-in-scale 0.25s ease forwards;
+  }
+  .modal {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); width: 90%; max-width: 740px;
+    max-height: 85vh; overflow-y: auto;
+    box-shadow: var(--shadow-lg); position: relative;
+    opacity: 0; transform: scale(0.96) translateY(8px);
+  }
+  .modal-close {
+    position: absolute; top: 14px; right: 14px; z-index: 10;
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--bg-subtle); border: none;
+    color: var(--text-secondary); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; transition: var(--transition);
+  }
+  .modal-close:hover { background: var(--bg-hover); color: var(--text); }
+  .modal-header {
+    padding: 28px 28px 0; flex-shrink: 0;
+    display: flex; gap: 20px; align-items: flex-start;
+  }
+  .modal-thumb {
+    width: 64px; height: 64px; border-radius: 12px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 700;
+  }
+  .modal-header h2 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 4px; }
+  .modal-header .inst { font-size: 13px; color: var(--text-secondary); }
+  .modal-body { padding: 20px 28px 0; }
+  .modal-stats {
+    display: flex; gap: 24px; margin-bottom: 20px;
+    padding: 14px 18px; background: var(--bg-subtle); border-radius: var(--radius-sm);
+  }
+  .mstat .val { font-size: 18px; font-weight: 700; }
+  .mstat .lbl { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+  .modal-body h4 { font-size: 13px; font-weight: 700; margin: 20px 0 8px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+  .modal-body p  { font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
+  .chapter-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px; border-radius: 6px; font-size: 13px;
+    transition: var(--transition);
+  }
+  .chapter-row:hover { background: var(--bg-subtle); }
+  .ch-num {
+    width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600;
+    background: var(--bg-subtle); color: var(--text-tertiary);
+  }
+  .ch-dur { margin-left: auto; font-size: 12px; color: var(--text-tertiary); }
+  .modal-footer {
+    padding: 16px 28px 28px; border-top: 1px solid var(--border-light);
+    margin-top: 24px; display: flex; gap: 10px;
+  }
+
+  /* ── Learning View ── */
+  .learn-view {
+    display: none; position: fixed; inset: 0; z-index: 300;
+    background: var(--bg);
+  }
+  .learn-view.open { display: flex; }
+  .learn-sidebar {
+    width: 300px; background: var(--bg-card); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; flex-shrink: 0;
+    min-height: 0;
+  }
+  .learn-sidebar-head {
+    padding: 14px 18px; border-bottom: 1px solid var(--border-light);
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 13px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .learn-chapters { flex: 1; overflow-y: auto; padding: 8px; min-height: 0; }
+  .learn-ch {
+    padding: 10px 12px; border-radius: 6px; cursor: pointer;
+    font-size: 13px; transition: var(--transition);
+    display: flex; align-items: center; gap: 10px; color: var(--text-secondary);
+  }
+  .learn-ch:hover { background: var(--bg-subtle); }
+  .learn-ch.active { background: var(--accent-light); color: var(--accent); font-weight: 600; }
+  .learn-main { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+  .learn-topbar {
+    padding: 12px 24px; border-bottom: 1px solid var(--border-light);
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--bg-card); font-size: 13px; font-weight: 600;
+    flex-shrink: 0;
+  }
+  .content-zone {
+    flex: 1; min-height: 0;
+    background: #f9f9f9;
+    overflow-y: auto; overflow-x: hidden;
+    padding: 24px 32px;
+  }
+  .content-card {
+    background: var(--bg-card); border: 1px solid var(--border-light);
+    border-radius: var(--radius); padding: 32px; max-width: 840px;
+    margin: 0 auto;
+    box-shadow: var(--shadow-sm);
+    position: relative;
+  }
+  .content-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0;
+    width: 40px; height: 40px;
+    border-left: 2px solid var(--accent-light);
+    border-top: 2px solid var(--accent-light);
+    border-radius: var(--radius) 0 0 0;
+    opacity: 0.8;
+  }
+  .content-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.2px; }
+  .content-card .content-sub { font-size: 12px; color: var(--text-tertiary); margin-bottom: 20px; }
+  .content-card .content-body { font-size: 14px; color: var(--text-secondary); line-height: 1.75; }
+  .content-card .highlight-box {
+    background: var(--accent-light); border-left: 3px solid var(--accent);
+    padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 16px 0;
+    font-size: 13px; color: var(--accent); font-weight: 500;
+  }
+  .content-card .task-box {
+    background: var(--orange-light); border-left: 3px solid var(--orange);
+    padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 16px 0;
+    font-size: 13px; color: var(--text-secondary);
+  }
+  .learn-bottom {
+    padding: 12px 24px; border-top: 1px solid var(--border-light);
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--bg-card); font-size: 13px;
+  }
+  .progress-track {
+    width: 100px; height: 4px; background: var(--border-light);
+    border-radius: 2px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: linear-gradient(90deg, var(--accent), #3b82f6, var(--accent));
+    background-size: 200% 100%;
+    border-radius: 2px;
+    transition: width 0.4s ease;
+    animation: progress-flow 3s linear infinite;
+  }
+  @keyframes progress-flow {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  .btn-sm {
+    padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600;
+    cursor: pointer; border: none; font-family: inherit; transition: var(--transition);
+  }
+  .btn-sm.primary { background: var(--text); color: #fff; }
+  .btn-sm.primary:hover { background: #333; }
+  .btn-sm.ghost {
+    background: transparent; color: var(--text-secondary);
+    border: 1px solid transparent;
+    padding: 5px 12px; border-radius: 6px;
+  }
+  .btn-sm.ghost:hover { color: var(--text); background: var(--bg-subtle); border-color: var(--border); }
+
+  /* ── AI panel (right side in learning view) ── */
+  .learn-ai-panel {
+    width: 320px; background: var(--bg-card); border-left: 1px solid var(--border);
+    display: flex; flex-direction: column; flex-shrink: 0;
+  }
+  .ai-panel-head {
+    padding: 14px 18px; border-bottom: 1px solid var(--border-light);
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 13px; font-weight: 700; gap: 8px;
+  }
+  .ai-panel-head .ai-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent); flex-shrink: 0;
+    box-shadow: 0 0 6px rgba(26,86,219,0.4);
+    animation: geo-pulse 2.5s ease-in-out infinite;
+  }
+  .ai-badge {
+    padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 500;
+    background: var(--accent-light); color: var(--accent);
+  }
+  .ai-chat-area {
+    flex: 1; overflow-y: auto; padding: 16px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .ai-msg {
+    font-size: 12.5px; line-height: 1.6; padding: 10px 14px;
+    border-radius: 10px; max-width: 92%;
+  }
+  .ai-msg.bot {
+    background: var(--bg-subtle); color: var(--text-secondary);
+    align-self: flex-start; border-bottom-left-radius: 3px;
+  }
+  .ai-msg.user {
+    background: var(--accent-light); color: var(--accent);
+    align-self: flex-end; border-bottom-right-radius: 3px;
+  }
+  .ai-quick-prompts {
+    padding: 12px 16px; border-top: 1px solid var(--border-light);
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .ai-quick-prompts button {
+    width: 100%; text-align: left; padding: 8px 12px; border-radius: 6px;
+    border: 1px solid var(--border-light); background: var(--bg-card);
+    font-size: 12px; cursor: pointer; font-family: inherit;
+    color: var(--text-secondary); transition: var(--transition);
+  }
+  .ai-quick-prompts button:hover {
+    background: var(--accent-light); color: var(--accent); border-color: var(--accent);
+  }
+  .ai-input-row {
+    padding: 10px 16px; border-top: 1px solid var(--border-light);
+    display: flex; gap: 8px;
+  }
+  .ai-input-row input {
+    flex: 1; border: 1px solid var(--border-light); border-radius: 6px;
+    padding: 8px 12px; font-size: 12.5px; font-family: inherit;
+    outline: none; transition: var(--transition);
+  }
+  .ai-input-row input:focus { border-color: var(--accent); }
+  .ai-input-row button {
+    padding: 8px 14px; border-radius: 6px; background: var(--text);
+    color: #fff; border: none; font-size: 12px; cursor: pointer;
+    font-family: inherit; font-weight: 600; transition: var(--transition);
+  }
+  .ai-input-row button:hover { background: #333; }
+
+  /* Resources in sidebar */
+  .learn-resources {
+    border-top: 1px solid var(--border-light);
+    max-height: 180px; overflow-y: auto;
+  }
+  .learn-resources-head {
+    padding: 10px 18px; font-size: 11px; font-weight: 700;
+    color: var(--text-tertiary); text-transform: uppercase;
+    letter-spacing: 0.5px; cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between;
+    user-select: none;
+  }
+  .learn-resources-head:hover { color: var(--text-secondary); }
+  .learn-resources-head .arrow { transition: transform 0.2s ease; font-size: 10px; }
+  .learn-resources.collapsed .learn-resources-body { display: none; }
+  .learn-resources.collapsed .arrow { transform: rotate(-90deg); }
+  .learn-resources-body { padding: 0 8px 8px; }
+  .res-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 10px; border-radius: 6px; cursor: pointer;
+    font-size: 12px; color: var(--text-secondary);
+    transition: var(--transition);
+  }
+  .res-item:hover { background: var(--bg-subtle); color: var(--text); }
+  .res-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; opacity: 0.5; }
+
+  /* Reflection note in sidebar */
+  .reflection-note {
+    padding: 12px 18px; border-top: 1px solid var(--border-light);
+  }
+  .reflection-note textarea {
+    width: 100%; height: 80px; border: 1px solid var(--border-light);
+    border-radius: 6px; padding: 10px; font-size: 12px; resize: vertical;
+    font-family: inherit; outline: none; transition: var(--transition);
+    line-height: 1.5;
+  }
+  .reflection-note textarea:focus { border-color: var(--accent); }
+  .reflection-note .note-label {
+    font-size: 11px; font-weight: 600; color: var(--text-tertiary);
+    margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .reflection-note .note-saved {
+    font-size: 11px; color: var(--green); margin-top: 4px; display: none;
+  }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(100px);
+    z-index: 500; padding: 10px 20px; border-radius: 8px;
+    background: var(--text); color: #fff; font-size: 13px; font-weight: 600;
+    transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+    pointer-events: none; box-shadow: var(--shadow-lg);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── Lesson Materials ── */
+  .mat-block { margin-bottom: 16px; animation: fade-in-up 0.35s ease forwards; }
+  .mat-block:nth-child(2) { animation-delay: 0.05s; }
+  .mat-block:nth-child(3) { animation-delay: 0.1s; }
+  .mat-block:nth-child(4) { animation-delay: 0.15s; }
+  .mat-block:nth-child(5) { animation-delay: 0.2s; }
+
+  .mat-label {
+    font-size: 10px; font-weight: 700; color: var(--text-tertiary);
+    text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;
+  }
+
+  /* Concept cards */
+  .concept-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .concept-card {
+    background: var(--bg-subtle); border-radius: var(--radius-sm); padding: 14px;
+    border-left: 3px solid var(--accent);
+  }
+  .concept-card .cc-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .concept-card .cc-body  { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+  .concept-card .cc-num   {
+    font-size: 11px; font-weight: 700; color: var(--accent);
+    width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center;
+    background: var(--accent-light); border-radius: 50%; margin-bottom: 6px;
+  }
+
+  /* Data table */
+  .mat-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .mat-table th {
+    text-align: left; padding: 8px 12px; background: var(--bg-subtle);
+    font-weight: 600; color: var(--text-secondary); border-bottom: 2px solid var(--border-light);
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.3px;
+  }
+  .mat-table td {
+    padding: 8px 12px; border-bottom: 1px solid var(--border-light);
+    color: var(--text-secondary); line-height: 1.4;
+  }
+  .mat-table tr:nth-child(even) td { background: #fafcfd; }
+  .mat-table .val { font-weight: 700; color: var(--text); }
+
+  /* Framework list */
+  .framework { display: flex; flex-direction: column; gap: 8px; }
+  .framework-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 12px; background: var(--bg-subtle); border-radius: var(--radius-sm);
+    font-size: 12.5px; line-height: 1.5;
+  }
+  .fw-num {
+    width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    background: var(--accent); color: #fff;
+  }
+  .fw-time {
+    flex-shrink: 0; padding: 3px 10px; border-radius: 12px;
+    font-size: 11px; font-weight: 600; white-space: nowrap;
+    background: var(--accent-light); color: var(--accent);
+    display: flex; align-items: center; gap: 3px;
+  }
+  .fw-lock {
+    width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; background: var(--bg-subtle); color: var(--text-tertiary);
+  }
+  .fw-text strong { display: block; font-size: 13px; margin-bottom: 2px; }
+
+  /* Comparison */
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .compare-col {
+    background: var(--bg-subtle); border-radius: var(--radius-sm); padding: 14px;
+  }
+  .compare-col h5 { font-size: 13px; font-weight: 700; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 2px solid var(--accent); }
+  .compare-col ul { list-style: none; font-size: 12px; color: var(--text-secondary); line-height: 1.7; }
+  .compare-col ul li::before { content: '· '; color: var(--accent); font-weight: 700; }
+
+  /* Data cards */
+  .data-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .data-card {
+    background: var(--bg-card); border: 1px solid var(--border-light);
+    border-radius: var(--radius-sm); padding: 14px; text-align: center;
+  }
+  .data-card .dc-val  { font-size: 22px; font-weight: 700; color: var(--accent); letter-spacing: -0.5px; }
+  .data-card .dc-unit { font-size: 12px; color: var(--text-tertiary); }
+  .data-card .dc-lbl  { font-size: 11px; color: var(--text-tertiary); margin-top: 4px; }
+
+  /* Quote */
+  .mat-quote {
+    background: var(--accent-light); border-left: 3px solid var(--accent);
+    padding: 12px 16px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-size: 13px; color: var(--accent); font-style: italic; line-height: 1.6;
+  }
+  .mat-quote .quote-src { font-size: 11px; color: var(--text-tertiary); font-style: normal; margin-top: 4px; }
+
+  /* Step list */
+  .step-list { display: flex; flex-direction: column; gap: 8px; }
+  .step-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border-light); font-size: 13px;
+    transition: var(--transition);
+  }
+  .step-num {
+    width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+    background: var(--text); color: #fff;
+  }
+
+  /* Tag row */
+  .tag-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .info-tag {
+    padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600;
+    background: var(--accent-light); color: var(--accent);
+  }
+
+  /* ── 评价互评（讨论区） ── */
+  .learn-tabs {
+    display: flex; gap: 0; margin: 16px 20px 0;
+    background: var(--bg-subtle); border-radius: 8px; padding: 3px;
+  }
+  .learn-tab {
+    flex: 1; padding: 8px 0; text-align: center; border: none; background: transparent;
+    font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 6px;
+    color: var(--text-secondary); transition: var(--transition);
+  }
+  .learn-tab.active { background: #fff; color: var(--text); box-shadow: var(--shadow-sm); }
+  .learn-tab .badge {
+    display: inline-block; background: var(--accent); color: #fff; font-size: 10px;
+    min-width: 18px; height: 18px; line-height: 18px; border-radius: 9px;
+    margin-left: 4px; font-weight: 700; padding: 0 5px;
+  }
+
+  /* Post form */
+  .post-form {
+    margin: 16px 20px 0; padding: 16px;
+    background: var(--bg-card); border: 1px solid var(--border-light);
+    border-radius: var(--radius); box-shadow: var(--shadow-sm);
+  }
+  .post-form textarea {
+    width: 100%; min-height: 72px; border: 1px solid var(--border-light);
+    border-radius: var(--radius-sm); padding: 10px 12px; font-size: 13px;
+    font-family: inherit; resize: vertical; line-height: 1.5;
+    transition: var(--transition);
+  }
+  .post-form textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+  .post-form .post-form-footer {
+    display: flex; justify-content: space-between; align-items: center; margin-top: 10px;
+  }
+  .post-form .char-hint { font-size: 11px; color: var(--text-tertiary); }
+  .post-form .char-hint.warn { color: var(--orange); }
+
+  /* Post list */
+  .discussion-zone {
+    flex: 1; overflow-y: auto; padding: 0 20px 20px;
+  }
+  .post-list { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+
+  /* Post card */
+  .post-card {
+    background: var(--bg-card); border: 1px solid var(--border-light);
+    border-radius: var(--radius); padding: 16px;
+    box-shadow: var(--shadow-sm); animation: fade-in-up 0.3s ease forwards;
+  }
+  .post-card-header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+  }
+  .post-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; flex-shrink: 0;
+  }
+  .post-meta { flex: 1; }
+  .post-author { font-size: 13px; font-weight: 600; }
+  .post-time { font-size: 11px; color: var(--text-tertiary); margin-top: 1px; }
+  .post-content {
+    font-size: 13.5px; line-height: 1.7; color: var(--text);
+    white-space: pre-wrap; word-break: break-word;
+  }
+  .post-footer {
+    display: flex; align-items: center; gap: 16px; margin-top: 12px;
+    padding-top: 10px; border-top: 1px solid var(--border-light);
+  }
+  .post-action {
+    display: inline-flex; align-items: center; gap: 4px;
+    border: none; background: transparent; cursor: pointer;
+    font-size: 12px; color: var(--text-tertiary); padding: 4px 8px;
+    border-radius: var(--radius-sm); transition: var(--transition);
+  }
+  .post-action:hover { background: var(--bg-hover); color: var(--text-secondary); }
+  .post-action.liked { color: #e74c3c; }
+  .post-action .action-icon { font-size: 15px; }
+
+  /* Comment area */
+  .comment-area {
+    margin-top: 10px; border-top: 1px solid var(--border-light);
+    padding-top: 10px; display: none;
+  }
+  .comment-area.open { display: block; animation: fade-in-up 0.25s ease forwards; }
+  .comment-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+  .comment-item {
+    display: flex; gap: 8px; padding: 8px 10px;
+    background: var(--bg-subtle); border-radius: var(--radius-sm);
+  }
+  .comment-avatar {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--text-secondary); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; flex-shrink: 0;
+  }
+  .comment-body { flex: 1; font-size: 12.5px; line-height: 1.5; }
+  .comment-body .cmt-author { font-weight: 600; font-size: 12px; }
+  .comment-body .cmt-time { font-size: 10px; color: var(--text-tertiary); margin-left: 6px; }
+  .comment-body .cmt-content { margin-top: 3px; color: var(--text-secondary); white-space: pre-wrap; word-break: break-word; }
+  .comment-input-row {
+    display: flex; gap: 8px;
+  }
+  .comment-input-row input {
+    flex: 1; border: 1px solid var(--border-light); border-radius: var(--radius-sm);
+    padding: 8px 10px; font-size: 12.5px; font-family: inherit;
+    transition: var(--transition);
+  }
+  .comment-input-row input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+
+  .empty-discussion {
+    text-align: center; padding: 40px 20px; color: var(--text-tertiary);
+  }
+  .empty-discussion .empty-icon { font-size: 40px; margin-bottom: 10px; }
+  .empty-discussion .empty-text { font-size: 13px; }
+
+  /* ── 教师端 ── */
+  .teacher-badge {
+    font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 10px;
+    background: var(--accent-light); color: var(--accent);
+  }
+  .teacher-toolbar {
+    display: flex; gap: 8px; margin-bottom: 10px; align-items: center;
+  }
+  .teacher-toolbar .toolbar-hint {
+    font-size: 11px; color: var(--text-tertiary); flex: 1;
+  }
+  .publish-toggle {
+    padding: 3px 10px; border-radius: 12px; border: 1px solid var(--border);
+    background: var(--bg-subtle); color: var(--text-secondary);
+    font-size: 11px; font-weight: 600; cursor: pointer;
+    transition: var(--transition);
+  }
+  .publish-toggle:hover { border-color: var(--accent); color: var(--accent); }
+  .publish-toggle.published {
+    background: var(--accent-light); color: var(--accent); border-color: var(--accent);
+  }
+  .publish-status {
+    font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 8px;
+    margin-left: 8px; flex-shrink: 0;
+  }
+  .publish-status.pub { background: #e6f7f5; color: #0d9488; }
+  .publish-status.draft { background: var(--bg-subtle); color: var(--text-tertiary); }
+  .activity-locked {
+    opacity: 0.55; background: var(--bg-subtle); border-left-color: var(--border) !important;
+  }
+  .activity-locked:hover { opacity: 0.75; }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .hero { grid-template-columns: 1fr; gap: 32px; }
+    .hero-geo { display: none; }
+    .nav-search { width: 140px; }
+    .nav-search:focus-within { width: 160px; }
+    .course-grid { grid-template-columns: 1fr; }
+    .learn-view { flex-direction: column; }
+    .learn-sidebar { width: 100%; max-height: 35vh; }
+    .learn-ai-panel { width: 100%; max-height: 30vh; }
+    .modal-header { flex-direction: column; }
+    .modal-stats { flex-wrap: wrap; gap: 14px; }
+    .modal-footer { flex-direction: column; }
+    .workshop-view { flex-direction: column; }
+    .workshop-sidebar { width: 100%; max-height: auto; }
+    .workshop-ai-panel { width: 100%; max-height: 30vh; }
+    .compare-columns { grid-template-columns: 1fr; }
+    .compare-dims { grid-template-columns: 1fr; }
+    .dashboard-grid { grid-template-columns: 1fr; }
+    .roster-table-wrap { overflow-x: auto; }
+    .stat-cards { grid-template-columns: repeat(2, 1fr); }
+    .module-bars { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* ── Auth Modal ── */
+  .auth-overlay {
+    position: fixed; inset: 0; z-index: 300;
+    background: rgba(0,0,0,0.35); backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s;
+  }
+  .auth-overlay.open { opacity: 1; pointer-events: auto; }
+  .auth-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); width: 380px; max-width: 92vw;
+    padding: 32px 28px 24px; box-shadow: var(--shadow-lg);
+    position: relative;
+  }
+  .auth-card h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; text-align: center; }
+  .auth-card .auth-sub { font-size: 13px; color: var(--text-tertiary); text-align: center; margin-bottom: 24px; }
+  .auth-tabs { display: flex; gap: 0; margin-bottom: 20px; border-radius: 8px; background: var(--bg-subtle); padding: 3px; }
+  .auth-tab {
+    flex: 1; padding: 8px 0; text-align: center; border: none; background: transparent;
+    font-size: 14px; cursor: pointer; border-radius: 6px; color: var(--text-secondary);
+    transition: var(--transition);
+  }
+  .auth-tab.active { background: #fff; color: var(--text); font-weight: 600; box-shadow: var(--shadow-sm); }
+  .auth-field { margin-bottom: 14px; }
+  .auth-field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: var(--text-secondary); }
+  .auth-field input {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); font-size: 14px; outline: none;
+    transition: var(--transition); font-family: inherit;
+  }
+  .auth-field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+  .auth-btn {
+    width: 100%; padding: 11px; border: none; border-radius: var(--radius-sm);
+    font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 6px;
+    transition: var(--transition);
+  }
+  .auth-btn.primary { background: var(--accent); color: #fff; }
+  .auth-btn.primary:hover { background: var(--accent-hover); }
+  .auth-error { color: #dc2626; font-size: 13px; text-align: center; margin-top: 10px; min-height: 18px; }
+  .auth-close {
+    position: absolute; top: 12px; right: 12px;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--bg-subtle); border: none;
+    color: var(--text-secondary); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; transition: var(--transition);
+  }
+  .auth-close:hover { background: var(--bg-hover); }
+  .nav-user {
+    display: flex; align-items: center; gap: 8px; cursor: pointer;
+    font-size: 14px; font-weight: 600; padding: 4px 10px;
+    border-radius: 20px; transition: var(--transition);
+  }
+  .nav-user:hover { background: var(--bg-hover); }
+  .nav-user .avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+  .nav-login-btn {
+    padding: 6px 16px; border: none; border-radius: 20px;
+    background: var(--accent); color: #fff; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: var(--transition);
+  }
+  .nav-login-btn:hover { background: var(--accent-hover); }
+  .nav-logout {
+    font-size: 12px; color: var(--text-tertiary); cursor: pointer;
+    padding: 2px 6px; border-radius: 4px; border: none; background: transparent;
+  }
+  .nav-logout:hover { color: #dc2626; background: #fef2f2; }
+
+  /* ── Workshop View ── */
+  .workshop-view {
+    display: none; position: fixed; inset: 0; z-index: 300;
+    background: var(--bg);
+  }
+  .workshop-view.open { display: flex; }
+  .workshop-sidebar {
+    width: 260px; background: var(--bg-card); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; flex-shrink: 0;
+  }
+  .workshop-sidebar-head {
+    padding: 14px 18px; border-bottom: 1px solid var(--border-light);
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 13px; font-weight: 700;
+  }
+  .workshop-nav-section {
+    padding: 14px 18px; border-bottom: 1px solid var(--border-light);
+  }
+  .workshop-nav-section h4 {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--text-tertiary); margin-bottom: 8px;
+  }
+  .workshop-type-option {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; border-radius: 6px; cursor: pointer;
+    font-size: 13px; color: var(--text-secondary); transition: var(--transition);
+    border: 1px solid transparent; margin-bottom: 4px;
+  }
+  .workshop-type-option:hover { background: var(--bg-subtle); }
+  .workshop-type-option.selected {
+    background: var(--accent-light); color: var(--accent); border-color: var(--accent); font-weight: 600;
+  }
+  .workshop-type-option .type-icon { font-size: 18px; flex-shrink: 0; }
+  .workshop-spec-hint {
+    font-size: 11px; color: var(--text-tertiary); margin-top: 6px; line-height: 1.5;
+  }
+  .workshop-nav-actions {
+    padding: 14px 18px; display: flex; flex-direction: column; gap: 6px;
+    margin-top: auto;
+  }
+  .workshop-nav-actions button {
+    width: 100%; text-align: left; padding: 8px 12px; border-radius: 6px;
+    border: 1px solid var(--border-light); background: var(--bg-card);
+    font-size: 12px; cursor: pointer; font-family: inherit;
+    color: var(--text-secondary); transition: var(--transition);
+  }
+  .workshop-nav-actions button:hover { background: var(--bg-subtle); }
+  .workshop-nav-actions button.primary-action {
+    background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600;
+  }
+  .workshop-nav-actions button.primary-action:hover { background: var(--accent-hover); }
+
+  .workshop-main {
+    flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0;
+  }
+  .workshop-topbar {
+    padding: 12px 24px; border-bottom: 1px solid var(--border-light);
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--bg-card); font-size: 13px; font-weight: 600;
+    flex-shrink: 0;
+  }
+  .workshop-editor {
+    flex: 1; overflow-y: auto; padding: 24px 32px;
+  }
+  .workshop-editor-inner {
+    max-width: 800px; margin: 0 auto;
+    display: flex; flex-direction: column; gap: 20px;
+  }
+  .workshop-editor-inner .field-label {
+    font-size: 12px; font-weight: 700; color: var(--text-secondary);
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .workshop-title-input {
+    width: 100%; padding: 12px 16px; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); font-size: 18px; font-weight: 600;
+    outline: none; font-family: inherit; transition: var(--transition);
+  }
+  .workshop-title-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+  .workshop-content-area {
+    width: 100%; min-height: 360px; padding: 16px;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    font-size: 14px; line-height: 1.8; outline: none;
+    font-family: inherit; resize: vertical; transition: var(--transition);
+  }
+  .workshop-content-area:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+  .workshop-word-count {
+    font-size: 12px; color: var(--text-tertiary); text-align: right;
+  }
+  .workshop-status-bar {
+    padding: 10px 24px; border-top: 1px solid var(--border-light);
+    background: var(--bg-card); font-size: 12px; color: var(--text-tertiary);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .workshop-ai-panel {
+    width: 300px; background: var(--bg-card); border-left: 1px solid var(--border);
+    display: flex; flex-direction: column; flex-shrink: 0;
+  }
+
+  /* ── Compare Overlay ── */
+  .compare-overlay {
+    position: fixed; inset: 0; z-index: 350;
+    background: rgba(0,0,0,0.3); backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+  }
+  .compare-overlay.open { opacity: 1; pointer-events: auto; }
+  .compare-modal {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); width: 94%; max-width: 1000px;
+    max-height: 88vh; overflow-y: auto;
+    box-shadow: var(--shadow-lg); position: relative;
+  }
+  .compare-header {
+    padding: 24px 28px 0; display: flex; align-items: center; justify-content: space-between;
+  }
+  .compare-header h2 { font-size: 18px; font-weight: 700; }
+  .compare-columns {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+    padding: 20px 28px;
+  }
+  .compare-col {
+    border: 1px solid var(--border-light); border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .compare-col-head {
+    padding: 12px 16px; font-size: 13px; font-weight: 700;
+    border-bottom: 1px solid var(--border-light);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .compare-col-head.human { background: var(--accent-light); color: var(--accent); }
+  .compare-col-head.ai { background: var(--orange-light); color: var(--orange); }
+  .compare-col-body {
+    padding: 16px; font-size: 13px; line-height: 1.75; color: var(--text-secondary);
+    max-height: 300px; overflow-y: auto;
+  }
+  .compare-col-body .compare-title {
+    font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 8px;
+  }
+  .compare-col-body .ai-tag {
+    display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px;
+    background: var(--orange-light); color: var(--orange); font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .compare-analysis-section {
+    padding: 0 28px 20px;
+  }
+  .compare-analysis-section h4 {
+    font-size: 13px; font-weight: 700; color: var(--text-secondary);
+    margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .compare-dims {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    margin-bottom: 16px;
+  }
+  .compare-dim {
+    border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 12px;
+  }
+  .compare-dim .dim-label {
+    font-size: 12px; font-weight: 700; margin-bottom: 4px;
+  }
+  .compare-dim .dim-desc {
+    font-size: 11px; color: var(--text-tertiary); margin-bottom: 8px;
+  }
+  .compare-dim textarea {
+    width: 100%; padding: 8px 10px; border: 1px solid var(--border);
+    border-radius: 4px; font-size: 12px; outline: none; font-family: inherit;
+    resize: vertical; min-height: 50px;
+  }
+  .compare-dim textarea:focus { border-color: var(--accent); }
+  .compare-footer {
+    padding: 16px 28px; border-top: 1px solid var(--border-light);
+    display: flex; gap: 10px; justify-content: flex-end;
+  }
+  .workshop-generating {
+    display: flex; align-items: center; gap: 8px; padding: 16px;
+    font-size: 13px; color: var(--accent);
+  }
+  .workshop-generating .spinner {
+    width: 16px; height: 16px; border: 2px solid var(--accent-light);
+    border-top-color: var(--accent); border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .btn-accent { background: var(--accent); color: #fff; }
+  .btn-accent:hover { background: var(--accent-hover); }
+  .btn-accent::after { content: none; }
+
+  /* ── Teacher Dashboard ── */
+  .dashboard-view {
+    display: none; position: fixed; inset: 0; z-index: 300;
+    background: var(--bg); overflow-y: auto;
+  }
+  .dashboard-view.open { display: block; }
+  .dashboard-head {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(250,250,250,0.9); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 28px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .dashboard-head h2 { font-size: 18px; font-weight: 700; }
+  .dashboard-tabs {
+    display: flex; gap: 4px; background: var(--bg-subtle);
+    border-radius: 8px; padding: 3px;
+  }
+  .dashboard-tab {
+    padding: 6px 16px; border: none; border-radius: 6px; cursor: pointer;
+    font-size: 13px; font-weight: 600; background: transparent;
+    color: var(--text-secondary); transition: var(--transition); font-family: inherit;
+  }
+  .dashboard-tab.active { background: #fff; color: var(--text); box-shadow: var(--shadow-sm); }
+  .dashboard-body { max-width: 1160px; margin: 0 auto; padding: 24px 28px; }
+
+  /* Stat cards */
+  .stat-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+  .stat-card {
+    background: var(--bg-card); border: 1px solid var(--border-light);
+    border-radius: var(--radius); padding: 18px 20px;
+  }
+  .stat-card .stat-val { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+  .stat-card .stat-lbl { font-size: 12px; color: var(--text-tertiary); margin-top: 4px; }
+  .stat-card.accent .stat-val { color: var(--accent); }
+  .stat-card.green .stat-val { color: var(--green); }
+  .stat-card.orange .stat-val { color: var(--orange); }
+
+  /* Module bars */
+  .module-bars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .module-bar-item {
+    background: var(--bg-card); border: 1px solid var(--border-light);
+    border-radius: var(--radius); padding: 14px 16px; text-align: center;
+  }
+  .module-bar-item .mod-name { font-size: 12px; color: var(--text-tertiary); margin-bottom: 6px; }
+  .module-bar-item .mod-count { font-size: 20px; font-weight: 700; color: var(--accent); }
+  .module-bar-item .mod-bar {
+    height: 4px; background: var(--border-light); border-radius: 2px;
+    margin-top: 8px; overflow: hidden;
+  }
+  .module-bar-item .mod-fill {
+    height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.4s ease;
+  }
+
+  /* Roster table */
+  .roster-table-wrap { margin-bottom: 24px; }
+  .roster-table {
+    width: 100%; border-collapse: collapse; font-size: 13px;
+    background: var(--bg-card); border: 1px solid var(--border-light); border-radius: var(--radius);
+  }
+  .roster-table th {
+    text-align: left; padding: 10px 14px; background: var(--bg-subtle);
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--text-tertiary); border-bottom: 1px solid var(--border-light);
+  }
+  .roster-table td { padding: 10px 14px; border-bottom: 1px solid var(--border-light); }
+  .roster-table tr:last-child td { border-bottom: none; }
+  .roster-table tr:hover td { background: var(--bg-subtle); }
+  .progress-dots { display: flex; gap: 3px; flex-wrap: wrap; }
+  .progress-dot {
+    width: 10px; height: 10px; border-radius: 2px;
+    background: var(--border-light);
+  }
+  .progress-dot.done { background: var(--green); }
+  .roster-actions { display: flex; gap: 6px; }
+  .roster-actions button {
+    font-size: 11px; padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border);
+    background: var(--bg-card); cursor: pointer; color: var(--text-secondary);
+    transition: var(--transition); font-family: inherit;
+  }
+  .roster-actions button:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Review panel */
+  .review-panel {
+    background: var(--bg-card); border: 1px solid var(--border-light);
+    border-radius: var(--radius); padding: 20px; margin-bottom: 16px;
+  }
+  .review-work-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .review-work-meta { font-size: 12px; color: var(--text-tertiary); margin-bottom: 12px; }
+  .review-work-content {
+    background: var(--bg-subtle); border-radius: var(--radius-sm); padding: 16px;
+    font-size: 13px; line-height: 1.75; color: var(--text-secondary);
+    max-height: 200px; overflow-y: auto; margin-bottom: 16px;
+  }
+  .review-form { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+  .review-form .score-input {
+    width: 70px; padding: 8px 10px; border: 1px solid var(--border);
+    border-radius: 6px; font-size: 14px; font-weight: 700; text-align: center;
+    outline: none; font-family: inherit;
+  }
+  .review-form .score-input:focus { border-color: var(--accent); }
+  .review-form .comment-input {
+    flex: 1; min-width: 200px; padding: 8px 12px; border: 1px solid var(--border);
+    border-radius: 6px; font-size: 13px; outline: none; font-family: inherit;
+  }
+  .review-form .comment-input:focus { border-color: var(--accent); }
+  .review-saved { font-size: 12px; color: var(--green); font-weight: 600; }
+
+  /* Summary view */
+  .summary-table {
+    width: 100%; border-collapse: collapse; font-size: 13px;
+    background: var(--bg-card); border: 1px solid var(--border-light); border-radius: var(--radius);
+  }
+  .summary-table th {
+    text-align: left; padding: 10px 14px; background: var(--bg-subtle);
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--text-tertiary); border-bottom: 1px solid var(--border-light);
+  }
+  .summary-table td { padding: 10px 14px; border-bottom: 1px solid var(--border-light); }
+
+  /* Analysis card */
+  .analysis-card {
+    background: var(--bg-card); border: 1px solid var(--accent-light);
+    border-radius: var(--radius); padding: 24px; margin-bottom: 24px;
+  }
+  .analysis-card h4 {
+    font-size: 14px; font-weight: 700; color: var(--accent); margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .analysis-body {
+    font-size: 13px; line-height: 1.8; color: var(--text-secondary);
+    white-space: pre-wrap;
+  }
+  .analysis-empty {
+    text-align: center; padding: 32px 0; color: var(--text-tertiary); font-size: 14px;
+  }
+  .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
+
+
+  /* ── Design Studio ── */
+  .studio-view {
+    display: none; position: fixed; inset: 0; z-index: 300;
+    background: var(--bg);
+  }
+  .studio-view.open { display: flex; }
+  .studio-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .studio-topbar {
+    padding: 10px 20px; border-bottom: 1px solid var(--border-light);
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--bg-card); font-size: 13px; font-weight: 600; flex-shrink: 0;
+  }
+  .studio-toolbar {
+    display: flex; align-items: center; gap: 6px; padding: 8px 16px;
+    background: var(--bg-card); border-bottom: 1px solid var(--border-light); flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+  .studio-toolbar button {
+    padding: 5px 10px; border-radius: 5px; font-size: 11px; font-weight: 600;
+    cursor: pointer; border: 1px solid var(--border); background: var(--bg-card);
+    color: var(--text-secondary); transition: var(--transition); font-family: inherit;
+    white-space: nowrap;
+  }
+  .studio-toolbar button:hover { background: var(--bg-subtle); border-color: var(--accent); color: var(--accent); }
+  .studio-toolbar button.active { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
+  .studio-toolbar .sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+  .studio-toolbar input[type="color"] { width: 26px; height: 26px; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; padding: 0; }
+  .studio-toolbar input[type="range"] { width: 60px; }
+  .studio-canvas-wrap {
+    flex: 1; background: #f0f0f0;
+    background-image: radial-gradient(circle, #ddd 1px, transparent 1px);
+    background-size: 20px 20px;
+    overflow: hidden; position: relative; min-height: 400px;
+  }
+  .studio-canvas-wrap canvas { display: block; cursor: crosshair; }
+  .studio-sidebar {
+    width: 280px; background: var(--bg-card); border-left: 1px solid var(--border);
+    display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto;
+  }
+  .studio-sidebar h4 {
+    padding: 12px 16px; font-size: 12px; text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--text-tertiary); border-bottom: 1px solid var(--border-light);
+  }
+  .studio-tag-list { padding: 8px; display: flex; flex-direction: column; gap: 4px; }
+  .studio-tag {
+    padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;
+    cursor: grab; border: 1px solid var(--border-light); transition: var(--transition);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .studio-tag:hover { background: var(--accent-light); border-color: var(--accent); }
+  .studio-tag .tag-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+  .studio-notes { padding: 16px; flex: 1; display: flex; flex-direction: column; }
+  .studio-notes textarea {
+    flex: 1; min-height: 160px; padding: 12px;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    font-size: 12px; line-height: 1.6; outline: none; font-family: inherit;
+    resize: vertical;
+  }
+  .studio-notes textarea:focus { border-color: var(--accent); }
+  .studio-params { padding: 12px 16px; font-size: 11px; color: var(--text-tertiary); line-height: 1.7; border-top: 1px solid var(--border-light); }
+  @media (max-width: 768px) {
+    .studio-view { flex-direction: column; }
+    .studio-sidebar { width: 100%; max-height: 40vh; }
+    .studio-toolbar { gap: 3px; padding: 6px 8px; }
+    .studio-toolbar button { padding: 4px 7px; font-size: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-texture"></div>
+
+<!-- ══════ Navbar ══════ -->
+<nav class="navbar" id="navbar">
+  <div class="container">
+    <div class="nav-left">
+      <a class="nav-logo"><span class="logo-mark"></span>人机共跑</a>
+      <ul class="nav-links">
+        <li><a class="active" onclick="showAllCourses()">全部课程</a></li>
+        <li><a onclick="showMyCourses()">我的学习</a></li>
+      </ul>
+    </div>
+    <div class="nav-right">
+      <div class="nav-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" placeholder="搜索课程..." id="searchInput" oninput="filterCourses()">
+      </div>
+      <span id="connStatus" style="width:8px;height:8px;border-radius:50%;background:#ccc;display:inline-block;" title="服务器连接状态"></span>
+      <div id="navUserArea">
+        <button class="nav-login-btn" onclick="showAuthModal('login')">登录</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════ Hero ══════ -->
+<section class="hero container">
+  <div class="hero-text">
+    <div class="eyebrow">2026 北京亦庄 · 人形机器人半程马拉松</div>
+    <h1>
+      人机共跑 — <span class="accent">跨学科PBL教学平台</span>
+    </h1>
+    <p>
+      以2026北京亦庄人形机器人半程马拉松为真实情境，整合地理、物理、信息技术、语文等多学科，化身"科技赛事研究员"，探究机器人奔跑背后的科技、城市与社会。
+    </p>
+    <div class="hero-actions">
+      <button class="btn btn-primary" onclick="scrollToCourses()">浏览课程</button>
+      <button class="btn btn-outline" onclick="showMyCourses()">我的学习</button>
+    </div>
+  </div>
+  <div class="hero-geo">
+    <div class="geo-block geo-b1"></div>
+    <div class="geo-block geo-b2">
+      <div class="geo-dots">
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+    <div class="geo-block geo-b3"></div>
+    <div class="geo-line geo-line-h"></div>
+    <div class="geo-line geo-line-v"></div>
+    <div class="geo-node n1"></div>
+    <div class="geo-node n2"></div>
+    <div class="geo-node n3"></div>
+  </div>
+</section>
+
+<!-- ══════ Category + Courses ══════ -->
+<div class="container" id="coursesSection">
+  <div class="cat-bar" id="catBar">
+    <button class="cat-pill active" data-cat="all" onclick="filterCat('all', this)">全部</button>
+    <button class="cat-pill" data-cat="m1" onclick="filterCat('m1', this)">城市与产业</button>
+    <button class="cat-pill" data-cat="m2" onclick="filterCat('m2', this)">科技与工程</button>
+    <button class="cat-pill" data-cat="m3" onclick="filterCat('m3', this)">数据与原理</button>
+    <button class="cat-pill" data-cat="m4" onclick="filterCat('m4', this)">传播与表达</button>
+  </div>
+
+  <div class="section-head">
+    <h2 id="sectionTitle">全部课程</h2>
+    <span id="resultCount">4 个模块 · 12 课时</span>
+  </div>
+  <div class="course-grid" id="courseGrid"></div>
+</div>
+
+<!-- ══════ Detail Modal ══════ -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<!-- ══════ Auth Modal ══════ -->
+<div class="auth-overlay" id="authOverlay" onclick="closeAuthModal(event)">
+  <div class="auth-card" onclick="event.stopPropagation()">
+    <button class="auth-close" onclick="closeAuthModal()">✕</button>
+    <h2 id="authTitle">登录</h2>
+    <p class="auth-sub" id="authSub">登录以同步学习进度</p>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="authTabLogin" onclick="switchAuthTab('login')">登录</button>
+      <button class="auth-tab" id="authTabRegister" onclick="switchAuthTab('register')">注册</button>
+    </div>
+    <form onsubmit="handleAuth(event)">
+      <div class="auth-field">
+        <label>用户名</label>
+        <input type="text" id="authUsername" placeholder="请输入用户名" required autocomplete="username">
+      </div>
+      <div class="auth-field" id="authNicknameField" style="display:none">
+        <label>昵称（选填）</label>
+        <input type="text" id="authNickname" placeholder="给自己取个好记的名字" autocomplete="off">
+      </div>
+      <div class="auth-field">
+        <label>密码</label>
+        <input type="password" id="authPassword" placeholder="请输入密码" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="auth-btn primary" id="authSubmitBtn">登录</button>
+    </form>
+    <div class="auth-error" id="authError"></div>
+  </div>
+</div>
+
+<!-- ══════ Learning View ══════ -->
+<div class="learn-view" id="learnView">
+  <div class="learn-sidebar">
+    <div class="learn-sidebar-head">
+      <span id="learnTitle">课程章节</span>
+      <button class="btn-sm ghost" onclick="closeLearn()">退出</button>
+    </div>
+    <div class="learn-chapters" id="learnChapters"></div>
+    <div class="learn-resources" id="learnResources">
+      <div class="learn-resources-head" onclick="document.getElementById('learnResources').classList.toggle('collapsed')">
+        学习资源 <span class="arrow">▼</span>
+      </div>
+      <div class="learn-resources-body" id="learnResourcesBody"></div>
+    </div>
+    <div class="reflection-note">
+      <div class="note-label">学习反思</div>
+      <textarea id="reflectionText" placeholder="记录本课时的收获与疑问..."></textarea>
+      <div class="note-saved" id="reflectionSaved">已保存</div>
+    </div>
+  </div>
+  <div class="learn-main">
+    <div class="learn-topbar">
+      <div>
+        <span id="moduleLabel" style="font-size:11px;color:var(--accent);font-weight:600;display:block;">模块一</span>
+        <span id="currentChapName">第1课时</span>
+      </div>
+      <span style="font-size:12px;color:var(--text-tertiary);" id="chapStatus">学习中</span>
+    </div>
+    <div class="learn-tabs">
+      <button class="learn-tab active" id="tabContent" onclick="switchLearnTab('content')">课程内容</button>
+      <button class="learn-tab" id="tabDiscuss" onclick="switchLearnTab('discussion')">评价互评 <span class="badge" id="postCountBadge" style="display:none">0</span></button>
+    </div>
+    <div class="content-zone" id="contentZone"></div>
+    <div class="discussion-zone" id="discussionZone" style="display:none;">
+      <div class="post-form">
+        <textarea id="postInput" placeholder="分享你的观点、作品或疑问..." maxlength="2000"></textarea>
+        <div class="post-form-footer">
+          <span class="char-hint" id="postCharHint">0 / 2000</span>
+          <button class="btn btn-sm primary" onclick="handleCreatePost()">发布</button>
+        </div>
+      </div>
+      <div class="post-list" id="postList">
+        <div class="empty-discussion">
+          <div class="empty-icon">💬</div>
+          <div class="empty-text">还没有帖子，快来发布第一条吧</div>
+        </div>
+      </div>
+    </div>
+    <div class="learn-bottom">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:12px;color:var(--text-tertiary);">学习进度</span>
+        <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+        <span style="font-size:12px;color:var(--text-tertiary);" id="progressText">0%</span>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn-sm ghost" onclick="prevLesson()">← 上一课时</button>
+        <button class="btn-sm primary" onclick="nextLesson()">下一课时 →</button>
+      </div>
+    </div>
+  </div>
+  <div class="learn-ai-panel" id="aiPanel">
+    <div class="ai-panel-head">
+      <span class="ai-dot"></span>
+      <span style="flex:1;">AI 学习助手</span>
+      <span class="ai-badge" id="aiBadge">GLM-4-Flash</span>
+    </div>
+    <div class="ai-chat-area" id="aiChatArea">
+      <div class="ai-msg bot">
+        你好！我是本课程的 AI 学习助手。<br><br>
+        <b>我能帮你：</b><br>
+        · 术语通俗化 — 把专业概念讲得简单易懂<br>
+        · 文案润色 — 优化你的分析报告和作品表达<br>
+        · 英文翻译 — 产出可用的英文版本<br>
+        · 内容合规检查 — 核查科技事实与表述准确性<br><br>
+        <b>重要提醒：</b>AI辅助、人工原创，所有AI输出请人工复核。<br>
+        点击下方快捷提问或直接输入。
+      </div>
+    </div>
+    <div class="ai-quick-prompts" id="aiQuickPrompts"></div>
+    <div class="ai-input-row">
+      <input type="text" id="aiInput" placeholder="输入你的问题..." onkeydown="if(event.key==='Enter')sendAiMsg()">
+      <button onclick="sendAiMsg()">发送</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ Workshop View ══════ -->
+<div class="workshop-view" id="workshopView">
+  <div class="workshop-sidebar">
+    <div class="workshop-sidebar-head">
+      <span>✏️ 创作工坊</span>
+      <button class="btn-sm ghost" onclick="closeWorkshop()">退出</button>
+    </div>
+    <div class="workshop-nav-section">
+      <h4>创作方向</h4>
+      <div id="workshopTypeOptions"></div>
+      <div class="workshop-spec-hint" id="workshopSpecHint"></div>
+    </div>
+    <div class="workshop-nav-actions">
+      <button onclick="saveDraft()">💾 保存草稿</button>
+      <button class="primary-action" onclick="submitWork()">📤 提交作品</button>
+      <button onclick="requestAICompare()">🤖 生成AI对比作品</button>
+      <button onclick="showCompareView()" id="btnShowCompare" style="display:none;">📊 查看人机对比</button>
+    </div>
+  </div>
+  <div class="workshop-main">
+    <div class="workshop-topbar">
+      <span id="workshopLessonLabel">模块四 · 创作工坊</span>
+      <span style="font-size:12px;color:var(--text-tertiary);" id="workshopStatus">草稿</span>
+    </div>
+    <div class="workshop-editor">
+      <div class="workshop-editor-inner">
+        <div>
+          <div class="field-label">作品标题</div>
+          <input type="text" class="workshop-title-input" id="workshopTitle" placeholder="输入作品标题..." oninput="onWorkshopChange()">
+        </div>
+        <div>
+          <div class="field-label">正文内容</div>
+          <textarea class="workshop-content-area" id="workshopContent" placeholder="在此创作你的科技传播作品..." oninput="onWorkshopChange()"></textarea>
+          <div class="workshop-word-count"><span id="wordCount">0</span> 字</div>
+        </div>
+      </div>
+    </div>
+    <div class="workshop-status-bar">
+      <span id="workshopSaveStatus">未保存</span>
+      <span id="workshopLastSaved"></span>
+    </div>
+  </div>
+  <div class="workshop-ai-panel" id="workshopAiPanel">
+    <div class="ai-panel-head">
+      <span class="ai-dot"></span>
+      <span style="flex:1;">AI 助手</span>
+      <span class="ai-badge">GLM-4-Flash</span>
+    </div>
+    <div class="ai-chat-area" id="workshopAiChat">
+      <div class="ai-msg bot">
+        在创作工坊中，我可以帮你：<br><br>
+        · 润色文案 — 优化你的表达<br>
+        · 翻译成英文 — 产出英文版本<br>
+        · 合规检查 — 核查事实准确性<br>
+        · 生成AI对比 — 用于人机创作对比
+      </div>
+    </div>
+    <div class="ai-quick-prompts" id="workshopAiPrompts"></div>
+    <div class="ai-input-row">
+      <input type="text" id="workshopAiInput" placeholder="输入问题..." onkeydown="if(event.key==='Enter')sendWorkshopAiMsg()">
+      <button onclick="sendWorkshopAiMsg()">发送</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ Teacher Dashboard ══════ -->
+<div class="dashboard-view" id="dashboardView">
+  <div class="dashboard-head">
+    <h2>📊 班级管理</h2>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div class="dashboard-tabs">
+        <button class="dashboard-tab active" id="dashTabOverview" onclick="switchDashTab('overview')">学情总览</button>
+        <button class="dashboard-tab" id="dashTabRoster" onclick="switchDashTab('roster')">学生名册</button>
+        <button class="dashboard-tab" id="dashTabWorks" onclick="switchDashTab('works')">作品评阅</button>
+        <button class="dashboard-tab" id="dashTabSummary" onclick="switchDashTab('summary')">评价汇总</button>
+        <button class="dashboard-tab" id="dashTabAnalysis" onclick="switchDashTab('analysis')">AI学情</button>
+      </div>
+      <button class="btn-sm ghost" onclick="closeDashboard()">关闭</button>
+    </div>
+  </div>
+  <div class="dashboard-body" id="dashboardBody"></div>
+</div>
+
+<!-- ══════ Design Studio ══════ -->
+<div class="studio-view" id="studioView">
+  <div class="studio-main">
+    <div class="studio-topbar">
+      <span>🔧 机器人设计工作室 — 打造半马冠军机器人</span>
+      <button class="btn-sm ghost" onclick="closeStudio()">退出</button>
+    </div>
+    <div class="studio-toolbar">
+      <button id="toolPen" class="active" onclick="studioSetTool('pen')" title="画笔">✏️ 画笔</button>
+      <button id="toolEraser" onclick="studioSetTool('eraser')" title="橡皮">🧹 橡皮</button>
+      <span class="sep"></span>
+      <button onclick="studioDrawShape('rect')" title="矩形">⬜ 矩形</button>
+      <button onclick="studioDrawShape('circle')" title="圆形">⭕ 圆形</button>
+      <button onclick="studioAddLabel()" title="文字标注">🔤 标注</button>
+      <span class="sep"></span>
+      <input type="color" id="studioColor" value="#1a56db" title="颜色" onchange="studioColor=this.value">
+      <input type="range" id="studioBrushSize" min="1" max="12" value="2" title="笔刷大小" oninput="studioBrushSize=parseInt(this.value)">
+      <span class="sep"></span>
+      <button onclick="studioUndo()" title="撤销">↩ 撤销</button>
+      <button onclick="studioClear()" title="清空">🗑 清空</button>
+      <button onclick="studioSave()" title="保存设计" style="background:var(--accent);color:#fff;border-color:var(--accent);">💾 保存</button>
+    </div>
+    <div class="studio-canvas-wrap" id="studioCanvasWrap">
+      <canvas id="studioCanvas"></canvas>
+    </div>
+  </div>
+  <div class="studio-sidebar">
+    <h4>🔩 五大系统标签（拖入画布）</h4>
+    <div class="studio-tag-list" id="studioTagList"></div>
+    <h4>📝 设计说明</h4>
+    <div class="studio-notes">
+      <textarea id="studioNotes" placeholder="撰写设计说明：&#10;1. 各系统核心参数选择及依据&#10;2. 多系统间的工程权衡与制衡关系&#10;3. 设计在「稳定性-续航-竞速」三角中的定位&#10;4. 相比现有方案的创新之处"></textarea>
+    </div>
+    <div class="studio-params" id="studioParams"></div>
+  </div>
+</div>
+
+<!-- ══════ Compare Overlay ══════ -->
+<div class="compare-overlay" id="compareOverlay" onclick="closeCompare(event)">
+  <div class="compare-modal" onclick="event.stopPropagation()">
+    <div class="compare-header">
+      <h2>🤖 人机创作对比</h2>
+      <button class="modal-close" onclick="closeCompare()">✕</button>
+    </div>
+    <div class="compare-columns">
+      <div class="compare-col">
+        <div class="compare-col-head human">✏️ 你的作品</div>
+        <div class="compare-col-body" id="compareHumanWork"></div>
+      </div>
+      <div class="compare-col">
+        <div class="compare-col-head ai">🤖 AI 生成作品</div>
+        <div class="compare-col-body" id="compareAiWork"></div>
+      </div>
+    </div>
+    <div class="compare-analysis-section">
+      <h4>📋 人机对比分析（请填写你的观察）</h4>
+      <div class="compare-dims" id="compareDims"></div>
+    </div>
+    <div class="compare-footer">
+      <button class="btn btn-outline" onclick="closeCompare()">关闭</button>
+      <button class="btn btn-accent" onclick="saveComparisonAnalysis()">💾 保存对比分析</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ Footer ══════ -->
+<footer style="position:relative;z-index:1;border-top:1px solid var(--border-light);margin-top:80px;padding:28px 0;text-align:center;">
+  <div class="container">
+    <p style="font-size:12px;color:var(--text-tertiary);margin:0;">
+      人机共跑 — 跨学科PBL教学平台 &nbsp;|&nbsp;
+      <span id="footerConn" style="color:var(--accent);">检测中...</span>
+    </p>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="/lib/leaflet.js"></script>
+<script src="materials.js"></script>
+<script>
+const courses = [
+  {
+    id: 1, cat: 'm1', tag: 'm1', tagCN: '模块一',
+    title: '城市与产业 — 为什么赛事落地亦庄？',
+    subtitle: '地理 · 政治 · 经济',
+    thumb: 'thumb-urban',
+    lessons: 3, dur: '2h', students: 0, rating: 4.9, price: 0,
+    desc: '从亦庄的空间区位、交通路网、城市特征切入，调研机器人产业集群与产业链生态，解读国家新质生产力与机器人产业扶持政策，最终整合地理、产业、政策三维度完成赛事选址综合分析。',
+    chaps: [
+      { t: '城市探索 — 定位亦庄的空间优势', d: '45min', desc: '在北京行政区划图中定位亦庄，测算与天安门的距离与通勤时长，对比市中心、海淀、朝阳的空间差异。观察亦庄卫星影像，分析建筑密度、道路宽度、绿化空间等城市特征。展示官方赛事路线，标注起点、途经节点与终点，解读"南海子公园—科创园区"的路线如何呈现"从生态到科创"的城市空间叙事。', task: '完成《亦庄空间定位分析表》和《赛事路线空间叙事图》；课后摘录《北京城市总体规划》中亦庄新城的3个核心定位。' },
+      { t: '产业寻链 — 解读亦庄的科技生态', d: '45min', desc: '分组调研小米机器人、优必选、宇树科技等亦庄代表性科创企业，梳理企业主营业务、核心技术优势与产业链归属。按"核心零部件—整机制造—系统集成—应用服务"四层分类，绘制产业生态图并标注上下游关联。通过思想实验对比"产业集聚区办赛"与"普通城区办赛"的差异，理解产业集群对赛事的技术测试、设备保障、人才支撑与产业氛围价值。', task: '绘制《亦庄机器人产业生态图》并撰写100字产业选址分析；课后调研一家亦庄机器人企业的核心技术故事。' },
+      { t: '政策解析 — 理解赛事的社会价值', d: '45min', desc: '研读《人形机器人创新发展指导意见》等国家政策文件摘要，小组提炼"新质生产力""创新驱动""科技强国"等核心关键词，构建政策关键词云。对比观看科技部新闻发布会与赛事现场集锦视频，从受众范围、参与感、传播效果、公众认知四个维度完成差异分析。整合地理空间、产业集群、国家政策三个维度的全部探究成果，以"科技赛事研究员"身份完成《为什么是亦庄》综合分析报告，通过微型课堂辩论展示核心论点并开展同伴互评。', task: '角色扮演赛事规划师，撰写150字通俗科普解说词；完成《为什么是亦庄》综合分析报告并进行小组展示与互评。' }
+    ],
+    resources: ['北京行政区划图与亦庄卫星影像', '赛事路线图、地铁线路图、南海子公园与科创园区实景图', '亦庄科创企业名录与产业空间布局图', '机器人产业发展报告摘要', '《人形机器人创新发展指导意见》等政策摘要', '城市总体规划中亦庄新城定位摘录'],
+    aiPrompts: ['解释"产业集群"和"产业链"的概念及区别', '帮我润色亦庄赛事选址分析的论证文案', '把这段政策关键词云翻译成英文简介', '帮我检查综合分析报告的逻辑结构']
+  },
+  {
+    id: 2, cat: 'm2', tag: 'm2', tagCN: '模块二',
+    title: '科技与工程 — 机器人如何自主奔跑？',
+    subtitle: '物理 · 生物 · 信息技术',
+    thumb: 'thumb-robot',
+    lessons: 3, dur: '2h', students: 0, rating: 4.8, price: 0,
+    desc: '观看赛事实况片段，从摔倒、减速、姿态失衡等现象出发，系统拆解机器人环境感知→数据处理→智能决策→运动执行的完整运行流程。对照人体跑步的感官、运动与能量机制完成仿生对比，建立包含五大维度的赛事评价框架，最终综合赛道约束完成参赛机器人优化设计。',
+    chaps: [
+      { t: '智感启程 — 解密机器人的奔跑系统', d: '45min', desc: '播放机器人赛事失误集锦（摔倒、减速、姿态失衡），学生记录问题现象，从信息技术（感知与决策）和物理（平衡、受力、能耗）两个维度初步分析成因。教师讲解机器人"环境感知→数据处理→智能决策→运动执行"的完整运行流程，解析重心平衡、能量转化、散热控制等核心物理设计。对照人体跑步的感官系统、肌肉运动与能量供给机制，完成人机仿生对照。', task: '完成机器人系统结构拆解图与人机仿生对照表；课后阅读中国科普博览机器人专题资料。' },
+      { t: '竞速评测 — 评选最佳半马机器人', d: '45min', desc: '引导学生认知工程系统"局部最优≠整体最优"的权衡思维。师生共同搭建评价框架，覆盖信息决策、运动执行、系统稳定、持续运行、模块协同五大维度。分组观看不同参赛机器人视频，依托自建框架多维度分析各机型优势与短板，完成评价记录表。全班交流对比结论，深化对复杂工程系统协同与制约关系的理解。', task: '使用五维评分卡完成至少3款参赛机器人的多维度对比评测，筛选最优方案并说明理由。' },
+      { t: '未来竞创 — 打造半马冠军机器人', d: '45min', desc: '梳理机器人核心运行系统间的工程制约关系（速度↑→散热压力↑，稳定性↑→速度可能↓），明确优质参赛机器人需兼顾稳定性、续航能力与竞速性能。小组围绕感知、决策、运动控制、能源、散热五大核心系统，结合赛道平地、坡道、弯道、窄路等复杂环境，设计适配半程马拉松的完整机器人方案。以"机器人设计发布会"形式展示方案，全班依托五维评价框架开展结构化互评，课后迭代完善。', task: '绘制机器人设计图并撰写设计说明（含系统参数与多维权衡论证）；完成3分钟方案展示与互评反馈汇总。' }
+    ],
+    resources: ['机器人赛事失误片段集锦（摔倒/减速/失衡）', '环境感知→决策→运动执行系统流程图', '不同参赛机器人型号视频与参数对比资料', '五维评价框架模板（信息决策/运动执行/系统稳定/持续运行/模块协同）', '机器人设计图模板（含系统标注规范）', '中国科普博览机器人专题资料'],
+    aiPrompts: ['解释人形机器人的"重心平衡控制"和"动态步态规划"', '帮我润色机器人设计说明的技术论证部分', '对比电机驱动、液压驱动、气动驱动的优缺点与适用场景', '帮我检查设计方案中多系统协同的逻辑完整性']
+  },
+  {
+    id: 3, cat: 'm3', tag: 'm3', tagCN: '模块三',
+    title: '数据与原理 — 如何优化机器人完赛能力？',
+    subtitle: '数学 · 物理 · 地理',
+    thumb: 'thumb-data',
+    lessons: 3, dur: '2h', students: 0, rating: 4.7, price: 0,
+    desc: '从赛事真实数据出发，建立运动指标、力学因素、环境因素、工程因素四维分析框架。完成平均速度、配速等核心指标计算与可视化，结合重心、摩擦力、坡度、风力等物理概念进行故障案例力学归因。研判赛事当天温度、风速、路面等环境数据，设计差异化参赛策略，最终整合全部成果撰写赛事综合评估报告。',
+    chaps: [
+      { t: '数据起跑 — 建立赛事分析框架', d: '45min', desc: '观看赛事数据回顾素材，聚焦不同机器人的完赛表现差异。引导学生将影响因素系统归类为运动指标（速度、配速、步态）、力学因素（重心、摩擦、坡度）、环境因素（温度、风速、路面）、工程因素（能源、散热、控制）四类，形成结构化问题清单。依托赛事真实数据，完成平均速度、配速等核心指标的计算，制作对比图表并初步提炼差异化结论。', task: '完成数据卡片填写，制作机器人赛事表现对比图表，标注数据来源。' },
+      { t: '原理分析 — 解释机器人表现差异', d: '45min', desc: '回顾上一课时的数据差异发现，选取机器人摔倒、转弯失衡、异常减速等典型故障案例。结合重心高度、摩擦力方向与大小、赛道坡度角、侧向风力等物理概念，对每个案例进行力学归因分析，绘制受力示意图，填写"现象—原理—结论"原因说明卡。同步结合赛事当日的温度、风速、路面湿度等环境数据，研判不同环境条件对机器人运行的安全风险。', task: '完成至少2个故障案例的完整力学归因分析（含受力示意图与原因说明卡）。' },
+      { t: '策略设计与综合评估 — 完赛优化报告', d: '45min', desc: '聚焦"速度↑→能耗↑→散热压力↑""稳定性↑→速度可能↓"等核心制衡关系，理解工程取舍逻辑。结合赛道环境数据，分组设计"保守完赛优先"与"竞速冲刺优先"两种差异化参赛策略并绘制策略对比矩阵。自主设置赛事评价指标及权重，搭建专属评价模型，整合数据分析、力学归因、环境研判、工程策略等全部成果，撰写《机器人参赛综合评估报告》并完成3分钟成果展示与互评。', task: '设计至少2套差异化参赛策略方案；撰写《机器人参赛综合评估报告》并完成3分钟成果展示。' }
+    ],
+    resources: ['赛事运动数据表（各机型速度/配速/步态/分段计时）', '赛道环境数据（当日温度/风速/路面湿度/坡度分布）', '力学分析模板与受力示意图绘制规范', '赛事综合评估报告模板（含评价指标设置指南）', 'Excel数据分析入门指南（平均速度/配速计算/图表制作）'],
+    aiPrompts: ['用简单的话解释"摩擦力"和"重心位置"如何影响机器人转弯稳定性', '帮我分析这组速度数据的趋势，并给出统计描述', '帮我把"配速策略""步态规划"翻译成英文术语', '帮我检查这份数据分析报告的"证据→原因→判断"逻辑链是否完整']
+  },
+  {
+    id: 4, cat: 'm4', tag: 'm4', tagCN: '模块四',
+    title: '传播与表达 — 如何讲好科技赛事故事？',
+    subtitle: '语文 · 英语 · 美术',
+    thumb: 'thumb-media',
+    lessons: 3, dur: '2h', students: 0, rating: 4.9, price: 0,
+    desc: '以"科技赛事传播者"身份，拆解官方媒体报道的5W1H要素与五段式结构，对比官媒、自媒体、英文外媒的传播差异。自主选择科普海报、新闻报道+英文简介或短视频脚本三类创作方向，在AI工具辅助下完成作品初稿。通过结构化同伴互评与人机创作对比，迭代优化作品并公开展示，树立"AI辅助、人工原创"的创作理念。',
+    chaps: [
+      { t: '传播初探 — 拆解科技故事的表达方式', d: '45min', desc: '播放赛事精彩短视频，引导学生思考"为什么要向公众传播科技赛事"——确立"科技赛事传播者"角色。精读官方赛事报道原文，用荧光笔标注5W1H核心要素（Who/What/When/Where/Why/How）与技术亮点，学习新闻标题、导语、主体、背景、结语五段式结构。对比官方媒体、自媒体、英文外媒对同一赛事的报道，从报道角度、信息准确性、语言可读性、受众适配度四个维度完成对比分析表。', task: '完成科技新闻五段式结构拆解与三方媒体对比分析表。' },
+      { t: '创意工坊 — 完成科技传播作品初稿', d: '45min', desc: '回顾科技传播核心技巧，介绍三类差异化创作任务：基础组完成科普海报设计，提升组完成中文新闻报道+英文简介，挑战组完成短视频脚本+AI配图创作。讲解专业术语通俗化转化的核心方法（类比法、场景法、分层法），演示AI工具在文案润色、英文翻译、内容合规检查中的合规应用流程与注意事项，强调"AI辅助、人工原创"原则。', task: '选择创作方向，完成科技传播作品初稿（科普海报/新闻报道+英文简介/短视频脚本 三选一）。' },
+      { t: '发布迭代 — 展示优化与人机反思', d: '45min', desc: '将作品初稿上传至班级共享平台，依托评价量规从准确性（科技事实无误）、清晰度（逻辑通顺易懂）、创造性（表达形式新颖）、规范性（格式/引用/语言规范）四个维度开展结构化同伴互评。教师现场使用AI生成同主题科普作品，学生小组对比分析人工与AI创作在创意、情感、准确性等方面的差异与各自优势。各组以"模拟发布会"形式展示最终作品并回应现场提问，填写个人学习日志，复盘创作方法与AI工具的辅助价值.', task: '完成同伴互评与人机创作对比分析；提交科技传播作品终稿与个人学习日志。' }
+    ],
+    resources: ['官方赛事科技报道原文与5W1H拆解模板', '官媒/自媒体/英文外媒三方报道对照材料', '科普海报设计规范（版面构图/配色方案/字体选择）', '短视频脚本分镜模板与创作指南', '作品评价量规（准确性/清晰度/创造性/规范性四维）', 'AI内容核查方法指南'],
+    aiPrompts: ['帮我把这段专业术语改写成小学生也能读懂的科普语言', '帮我把这段赛事介绍翻译成英文，适合海外社交媒体发布', '帮我检查这篇科普文章的科学准确性与内容合规性', '从受众视角对比人工创作与AI创作：各自的优势在哪？']
+  }
+];
+
+// ── 课时教学资料见 materials.js（独立文件，便于维护）──
+const API_BASE = '/api';
+let serverAvailable = false;
+let curCat = 'all';
+let enrolled = new Set();
+let currentPublishState = [];
+let isTeacher = false;
+let curCourse = null;
+let curChapIdx = 0;
+let completedLessons = {};
+let reflections = {};
+
+// ── Auth state ──
+let authToken = localStorage.getItem('pbl_token') || '';
+let currentUser = null;
+
+function updateNavUser() {
+  const area = document.getElementById('navUserArea');
+  if (currentUser) {
+    const initial = currentUser.username.charAt(0).toUpperCase();
+    const teacher = currentUser.role === 'teacher';
+    area.innerHTML = `
+      <div class="nav-user" title="${currentUser.username}${teacher ? ' (教师)' : ''}">
+        <div class="avatar" style="${teacher ? 'background:var(--accent);' : ''}">${initial}</div>
+        <span>${currentUser.username}</span>
+        ${teacher ? '<span class="teacher-badge">教师</span>' : ''}
+        ${teacher ? '<button class="nav-login-btn" style="margin-left:6px;background:var(--text);" onclick="openDashboard()">📊 班级管理</button>' : ''}
+        <button class="nav-logout" onclick="handleLogout()">退出</button>
+      </div>`;
+  } else {
+    area.innerHTML = '<button class="nav-login-btn" onclick="showAuthModal(\'login\')">登录</button>';
+  }
+}
+
+function showAuthModal(tab) {
+  document.getElementById('authOverlay').classList.add('open');
+  switchAuthTab(tab);
+}
+
+function closeAuthModal(e) {
+  if (e && e.target !== document.getElementById('authOverlay')) return;
+  document.getElementById('authOverlay').classList.remove('open');
+  document.getElementById('authError').textContent = '';
+  document.getElementById('authUsername').value = '';
+  document.getElementById('authPassword').value = '';
+}
+
+function switchAuthTab(tab) {
+  const isLogin = tab === 'login';
+  document.getElementById('authTabLogin').classList.toggle('active', isLogin);
+  document.getElementById('authTabRegister').classList.toggle('active', !isLogin);
+  document.getElementById('authTitle').textContent = isLogin ? '登录' : '注册';
+  document.getElementById('authSub').textContent = isLogin ? '登录以同步学习进度' : '创建账号开始学习';
+  document.getElementById('authSubmitBtn').textContent = isLogin ? '登录' : '注册';
+  document.getElementById('authError').textContent = '';
+  document.getElementById('authUsername').value = '';
+  document.getElementById('authPassword').value = '';
+}
+
+async function handleAuth(e) {
+  e.preventDefault();
+  const isLogin = document.getElementById('authTabLogin').classList.contains('active');
+  const username = document.getElementById('authUsername').value.trim();
+  const password = document.getElementById('authPassword').value.trim();
+  const errEl = document.getElementById('authError');
+
+  if (!username || !password) { errEl.textContent = '请填写用户名和密码'; return; }
+  if (username.length < 2) { errEl.textContent = '用户名至少2个字符'; return; }
+  if (password.length < 4) { errEl.textContent = '密码至少4个字符'; return; }
+
+  const route = isLogin ? '/login' : '/register';
+  try {
+    const res = await fetch(API_BASE + route, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      authToken = data.token;
+      currentUser = data.user;
+      localStorage.setItem('pbl_token', authToken);
+      localStorage.setItem('pbl_user', JSON.stringify(currentUser));
+      isTeacher = data.user.role === 'teacher';
+      updateNavUser();
+      closeAuthModal();
+      await loadProgress();
+      await loadReflections();
+      renderCourses();
+      showToast(isLogin ? '登录成功' : '注册成功，欢迎加入！');
+    } else {
+      errEl.textContent = data.error || '操作失败';
+    }
+  } catch {
+    errEl.textContent = '服务器连接失败，请检查网络';
+  }
+}
+
+async function handleLogout() {
+  try {
+    await fetch(API_BASE + '/logout', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + authToken }
+    });
+  } catch {}
+  authToken = '';
+  currentUser = null;
+  localStorage.removeItem('pbl_token');
+  localStorage.removeItem('pbl_user');
+  localStorage.removeItem('pbl_enrolled');
+  completedLessons = {};
+  enrolled = new Set();
+  isTeacher = false;
+  currentPublishState = [];
+  reflections = {};
+  updateNavUser();
+  renderCourses();
+  showToast('已退出登录');
+}
+
+// ── Server API helpers ──
+async function apiCall(method, route, body) {
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (authToken) headers['Authorization'] = 'Bearer ' + authToken;
+    const opts = { method, headers };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(API_BASE + route, opts);
+    if (res.ok) { serverAvailable = true; return await res.json(); }
+    if (res.status === 401) {
+      // Token expired or invalid
+      authToken = '';
+      currentUser = null;
+      localStorage.removeItem('pbl_token');
+      localStorage.removeItem('pbl_user');
+      updateNavUser();
+    }
+    serverAvailable = false; return null;
+  } catch {
+    serverAvailable = false; return null;
+  }
+}
+
+async function syncProgress() {
+  if (!serverAvailable || !currentUser) return;
+  const data = {};
+  for (const [id, set] of Object.entries(completedLessons)) {
+    data[id] = [...set];
+  }
+  await apiCall('POST', '/progress', data);
+}
+
+async function loadProgress() {
+  if (!currentUser) return;
+  const data = await apiCall('GET', '/progress');
+  if (data) {
+    for (const [id, arr] of Object.entries(data)) {
+      completedLessons[id] = new Set(arr);
+    }
+    // Merge: server data + localStorage enrollment (union, don't lose anything)
+    Object.keys(completedLessons).forEach(k => enrolled.add(parseInt(k)));
+    saveEnrollmentToLocal();
+    if (document.querySelector('.nav-links a.active') &&
+        document.querySelector('.nav-links a.active').textContent === '我的学习') {
+      showMyCourses();
+    }
+  }
+}
+
+async function syncReflections() {
+  if (!serverAvailable || !currentUser) return;
+  await apiCall('POST', '/reflections', reflections);
+}
+
+async function loadReflections() {
+  if (!currentUser) return;
+  const data = await apiCall('GET', '/reflections');
+  if (data) {
+    reflections = data;
+    if (curCourse && document.getElementById('learnView').classList.contains('open')) {
+      const refKey = curCourse.id + '_' + curChapIdx;
+      document.getElementById('reflectionText').value = reflections[refKey] || '';
+    }
+  }
+}
+
+// Initialize: try to load server data, fall back to localStorage
+(async function init() {
+  const statusDot = document.getElementById('connStatus');
+  const footerConn = document.getElementById('footerConn');
+
+  // 1. Restore auth from localStorage
+  if (authToken) {
+    const saved = localStorage.getItem('pbl_user');
+    if (saved) {
+      try { currentUser = JSON.parse(saved); } catch { currentUser = null; }
+    }
+    // Validate token with server
+    const meData = await apiCall('GET', '/me');
+    if (meData && meData.user) {
+      currentUser = meData.user;
+      isTeacher = currentUser.role === 'teacher';
+      localStorage.setItem('pbl_user', JSON.stringify(currentUser));
+    } else {
+      authToken = '';
+      currentUser = null;
+      localStorage.removeItem('pbl_token');
+      localStorage.removeItem('pbl_user');
+    }
+  }
+  updateNavUser();
+
+  // 1.5 Restore enrolled from localStorage (survives refresh even if sync didn't complete)
+  restoreEnrollmentFromLocal();
+
+  // 2. Check server connection
+  await apiCall('GET', '/status');
+  if (serverAvailable) {
+    statusDot.style.background = '#0d9488';
+    statusDot.title = '服务器已连接 - 数据云端同步';
+    if (footerConn) footerConn.textContent = '服务已连接 · 数据云端同步 · AI: 智谱GLM-4-Flash';
+    const badge = document.getElementById('aiBadge');
+    if (badge) { badge.textContent = 'GLM-4-Flash'; badge.style.background = '#e6f7f5'; badge.style.color = '#0d9488'; }
+    if (currentUser) {
+      await loadProgress();
+      await loadReflections();
+    }
+    console.log('✅ 已连接服务器' + (currentUser ? '，用户: ' + currentUser.username : ''));
+  } else {
+    statusDot.style.background = '#ea5a0c';
+    statusDot.title = '离线模式 - 数据本地存储';
+    if (footerConn) footerConn.textContent = '离线模式 · 数据本地存储';
+    const badge = document.getElementById('aiBadge');
+    if (badge) { badge.textContent = '离线模拟'; badge.style.background = '#fff7ed'; badge.style.color = '#ea5a0c'; }
+    // Fallback to localStorage
+    try {
+      const sp = localStorage.getItem('pbl_progress');
+      if (sp) {
+        const parsed = JSON.parse(sp);
+        for (const [id, arr] of Object.entries(parsed)) {
+          completedLessons[id] = new Set(arr);
+        }
+        Object.keys(completedLessons).forEach(k => enrolled.add(parseInt(k)));
+      }
+      const sr = localStorage.getItem('pbl_reflections');
+      if (sr) reflections = JSON.parse(sr);
+    } catch {}
+    console.log('💻 离线模式，数据本地存储');
+  }
+  renderCourses();
+})();
+
+function renderCourses(filter = 'all', search = '') {
+  let list = courses;
+  if (filter !== 'all') list = list.filter(c => c.cat === filter);
+  if (search) {
+    const q = search.toLowerCase();
+    list = list.filter(c => c.title.toLowerCase().includes(q) || c.desc.includes(q));
+  }
+  const totalLessons1 = list.reduce((s, c) => s + c.lessons, 0);
+  document.getElementById('resultCount').textContent = list.length + ' 个模块 · ' + totalLessons1 + ' 课时';
+
+  const grid = document.getElementById('courseGrid');
+  if (!list.length) {
+    grid.innerHTML = `<div class="empty-state"><div class="empty-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></div><p>没有匹配的课程</p></div>`;
+    return;
+  }
+  grid.innerHTML = list.map((c, i) => `
+    <div class="course-card" onclick="openDetail(${c.id})" style="animation-delay:${i * 0.04}s">
+      <div class="card-thumb ${c.thumb}">${['','城市与产业','科技与工程','数据与原理','传播与表达'][c.id]}</div>
+      <span class="card-tag tag-${c.tag}">${c.tagCN}</span>
+      <div class="card-title">${c.title}</div>
+      <div class="card-meta"><span>${c.lessons} 课时</span><span>⏱ ${c.dur}</span><span>${c.subtitle}</span></div>
+      <div class="card-bottom">
+        <span class="lessons">免费</span>
+        <span class="students">跨学科PBL</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterCat(cat, el) {
+  curCat = cat;
+  document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  renderCourses(cat, document.getElementById('searchInput').value);
+}
+
+function filterCourses() {
+  renderCourses(curCat, document.getElementById('searchInput').value);
+}
+
+function showAllCourses() {
+  curCat = 'all';
+  document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+  document.querySelector('[data-cat="all"]').classList.add('active');
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  document.querySelector('.nav-links a').classList.add('active');
+  document.getElementById('searchInput').value = '';
+  document.getElementById('sectionTitle').textContent = '全部课程';
+  renderCourses('all');
+  document.getElementById('coursesSection').scrollIntoView({behavior:'smooth'});
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function showMyCourses() {
+  if (!requireAuth()) return;
+  document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-links a').forEach((a,i) => a.classList.toggle('active', i===1));
+  const list = courses.filter(c => enrolled.has(c.id));
+  document.getElementById('sectionTitle').textContent = '我的学习';
+  const totalLessons2 = list.reduce((s, c) => s + c.lessons, 0);
+  document.getElementById('resultCount').textContent = list.length + ' 个模块 · ' + totalLessons2 + ' 课时';
+
+  const grid = document.getElementById('courseGrid');
+  if (!list.length) {
+    grid.innerHTML = `<div class="empty-state"><div class="empty-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><p>还没有加入任何课程</p></div>`;
+    document.getElementById('coursesSection').scrollIntoView({behavior:'smooth'});
+    return;
+  }
+  grid.innerHTML = list.map((c, i) => {
+    const done = completedLessons[c.id] ? completedLessons[c.id].size : 0;
+    const pct = Math.round(done / c.lessons * 100);
+    return `
+    <div class="course-card" onclick="startLearn(${c.id})" style="animation-delay:${i * 0.04}s">
+      <div class="card-thumb ${c.thumb}">${['','城市与产业','科技与工程','数据与原理','传播与表达'][c.id]}</div>
+      <span class="card-tag" style="background:#ecfdf5;color:#0d9488;">学习中</span>
+      <div class="card-title">${c.title}</div>
+      <div class="card-meta"><span>${c.lessons} 课时</span><span>${c.subtitle}</span></div>
+      <div class="card-meta" style="margin-bottom:2px;"><span style="color:var(--accent);font-weight:600;">已完成 ${done}/${c.lessons} 课时</span></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:2px;">
+        <div class="progress-track" style="flex:1;"><div class="progress-fill" style="width:${pct}%"></div></div>
+        <span style="font-size:12px;color:var(--text-tertiary);">${pct}%</span>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px;">继续学习</button>
+    </div>`;
+  }).join('');
+  document.getElementById('coursesSection').scrollIntoView({behavior:'smooth'});
+}
+
+// ── Modal ──
+function openDetail(id) {
+  curCourse = courses.find(c => c.id === id); if (!curCourse) return;
+  const c = curCourse;
+  var enrolledClass = enrolled.has(c.id) ? 'btn-outline' : 'btn-primary';
+  var enrolledText = enrolled.has(c.id) ? '继续学习' : '加入课程';
+  var enrolledAction = enrolled.has(c.id) ? 'startLearn(' + c.id + ')' : 'enroll(' + c.id + ')';
+  if (!currentUser) {
+    enrolledText = '登录后学习';
+    enrolledAction = "showAuthModal('login')";
+  }
+  document.getElementById('modalContent').innerHTML = `
+    <div class="modal-header">
+      <div class="modal-thumb ${c.thumb}" style="font-size:13px;">${['','M1','M2','M3','M4'][c.id]}</div>
+      <div>
+        <h2>${c.title}</h2>
+        <div class="inst">${c.subtitle} · PBL项目式学习 · 初三升高一</div>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-stats">
+        <div class="mstat"><div class="val">${c.lessons}</div><div class="lbl">课时</div></div>
+        <div class="mstat"><div class="val">${c.dur}</div><div class="lbl">总时长</div></div>
+        <div class="mstat"><div class="val">★ ${c.rating}</div><div class="lbl">推荐指数</div></div>
+        <div class="mstat"><div class="val">PBL</div><div class="lbl">教学模式</div></div>
+      </div>
+      <h4>模块简介</h4>
+      <p>${c.desc}</p>
+      <h4>课时安排</h4>
+      ${c.chaps.map((ch,i) => `
+        <div class="chapter-row"><span class="ch-num">${i+1}</span><span>${ch.t}</span><span class="ch-dur">${ch.d}</span></div>
+      `).join('')}
+      <h4>配套资源</h4>
+      ${c.resources.map(r => `
+        <div class="chapter-row"><span class="ch-num" style="background:var(--accent-light);color:var(--accent);">📄</span><span>${r}</span></div>
+      `).join('')}
+    </div>
+    <div class="modal-footer">
+      <button class="btn ${enrolledClass}" style="flex:1;justify-content:center;" onclick="${enrolledAction}">${enrolledText}</button>
+      <button class="btn btn-outline" onclick="closeModal()">关闭</button>
+    </div>
+  `;
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modalOverlay')) return;
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function requireAuth() {
+  if (!currentUser) {
+    showAuthModal('login');
+    showToast('请先登录再学习课程');
+    return false;
+  }
+  return true;
+}
+
+function enroll(id) {
+  if (!requireAuth()) return;
+  enrolled.add(id);
+  if (!completedLessons[id]) completedLessons[id] = new Set();
+  saveProgressToLocal();
+  syncProgress();
+  showToast('已加入课程');
+  closeModal();
+  setTimeout(function() { startLearn(id); }, 400);
+}
+
+// ── Learning ──
+function startLearn(id) {
+  if (!requireAuth()) return;
+  curCourse = courses.find(c => c.id === id); if (!curCourse) return;
+  if (!enrolled.has(id)) { enrolled.add(id); if (!completedLessons[id]) completedLessons[id] = new Set(); saveProgressToLocal(); syncProgress(); }
+  curChapIdx = 0;
+  discussionTab = 'content';
+  switchLearnTab('content');
+  resetChatHistory();
+  document.getElementById('learnTitle').textContent = curCourse.title;
+  document.getElementById('learnView').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('modalOverlay').classList.remove('open');
+  const aiModelLabel = serverAvailable ? '智谱·GLM-4-Flash' : '离线模拟模式';
+  document.getElementById('aiChatArea').innerHTML = `
+    <div class="ai-msg bot">你好！我是「${curCourse.tagCN}：${curCourse.title.split('—')[0].trim()}」的 AI 学习助手（${aiModelLabel}）。<br><br>我能帮你：术语通俗化、文案润色、英文翻译、内容合规检查。所有AI输出请人工复核。点击下方快捷提问或直接输入问题。</div>
+  `;
+  updateAiPrompts();
+  updateLearnUI();
+  if (serverAvailable) loadPosts(curCourse.id + '_' + curChapIdx);
+}
+
+async function updateLearnUI() {
+  const ch = curCourse.chaps;
+  const comp = completedLessons[curCourse.id] || new Set();
+  document.getElementById('learnChapters').innerHTML = ch.map((c, i) => `
+    <div class="learn-ch ${i===curChapIdx?'active':''}" onclick="curChapIdx=${i};updateLearnUI();">
+      <span class="ch-num" style="background:${comp.has(i)?'var(--green)':'var(--bg-subtle)'};color:${comp.has(i)?'#fff':'var(--text-tertiary)'};">${comp.has(i)?'✓':i+1}</span>${c.t}<span style="margin-left:auto;font-size:11px;color:var(--text-tertiary);">${c.d}</span>
+    </div>
+  `).join('');
+  document.getElementById('moduleLabel').textContent = curCourse.tagCN + ' · ' + curCourse.subtitle;
+  document.getElementById('currentChapName').textContent = `第${curChapIdx+1}课时 · ${ch[curChapIdx].t}`;
+  const pct = Math.round(comp.size / ch.length * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = pct + '%';
+  document.getElementById('chapStatus').textContent = comp.has(curChapIdx) ? '已完成' : '学习中';
+
+  const refKey = curCourse.id + '_' + curChapIdx;
+  document.getElementById('reflectionText').value = reflections[refKey] || '';
+  document.getElementById('reflectionSaved').style.display = 'none';
+
+  document.getElementById('learnResourcesBody').innerHTML = curCourse.resources.map(r => `
+    <div class="res-item" onclick="showToast('资源下载中...（Demo）')">
+      <span class="res-dot"></span><span>${r}</span>
+      <span style="margin-left:auto;font-size:10px;color:var(--text-tertiary);">⬇</span>
+    </div>
+  `).join('');
+
+  // 加载发布状态
+  await loadPublishState(curCourse.id + '_' + curChapIdx);
+  const materialsHTML = renderMaterials(curCourse.id, curChapIdx, currentPublishState, isTeacher);
+  document.getElementById('contentZone').innerHTML = `
+    <div class="content-card">
+      <h3>${ch[curChapIdx].t}</h3>
+      <div class="content-sub">⏱ ${ch[curChapIdx].d} · PBL探究 &nbsp;|&nbsp; ${curCourse.subtitle}</div>
+      <div class="content-body">
+        <p>${ch[curChapIdx].desc}</p>
+        <div class="highlight-box">
+          <strong>学习目标：</strong>${ch[curChapIdx].desc.split('。')[0]}。
+        </div>
+        <div class="task-box">
+          <strong>课堂任务：</strong>${ch[curChapIdx].task}
+        </div>
+        ${materialsHTML ? `<div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border-light);">${materialsHTML}</div>` : ''}
+        <p style="margin-top:20px;font-size:13px;">
+          <span style="color:var(--accent);font-weight:600;cursor:pointer;border-bottom:1px dashed var(--accent);"
+                onclick="document.getElementById('learnResources').classList.remove('collapsed');document.getElementById('learnResources').scrollIntoView({behavior:'smooth'});">
+            📎 左侧栏查看本模块配套资源（${curCourse.resources.length}项）
+          </span>
+        </p>
+        ${curCourse.id === 4 ? `<div style="text-align:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--border-light);"><button class="btn btn-accent" style="font-size:14px;padding:12px 28px;" onclick="openWorkshop('4_${curChapIdx}')">✏️ 进入创作工坊</button><p style="font-size:11px;color:var(--text-tertiary);margin-top:6px;">选择创作方向，在AI辅助下完成你的科技传播作品</p></div>` : ''}
+        ${curCourse.id === 2 && curChapIdx === 2 ? `<div style="text-align:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--border-light);"><button class="btn btn-accent" style="font-size:14px;padding:12px 28px;" onclick="openDesignStudio()">🔧 进入设计工作室</button><p style="font-size:11px;color:var(--text-tertiary);margin-top:6px;">绘制机器人设计图，标注五大系统，撰写设计说明</p></div>` : ''}
+      </div>
+    </div>
+  `;
+  // 刷新讨论区帖子（保持当前tab不切换）
+  if (serverAvailable) loadPosts(curCourse.id + '_' + curChapIdx);
+}
+
+function updateAiPrompts() {
+  let prompts = curCourse.aiPrompts.map(p => `
+    <button onclick="sendQuickPrompt('${p}')">${p}</button>
+  `).join('');
+  if (curCourse.id === 4) {
+    prompts += '<button onclick="openWorkshop(\'4_' + curChapIdx + '\')" style="border-color:var(--accent);color:var(--accent);font-weight:600;">✏️ 打开创作工坊</button>';
+  }
+  document.getElementById('aiQuickPrompts').innerHTML = prompts;
+}
+
+document.getElementById('reflectionText').addEventListener('input', function() {
+  const refKey = curCourse.id + '_' + curChapIdx;
+  reflections[refKey] = this.value;
+  document.getElementById('reflectionSaved').style.display = this.value ? '' : 'none';
+  try { localStorage.setItem('pbl_reflections', JSON.stringify(reflections)); } catch {}
+  // Debounced server sync
+  clearTimeout(this._syncTimer);
+  this._syncTimer = setTimeout(() => syncReflections(), 1500);
+});
+
+function nextLesson() {
+  if (!completedLessons[curCourse.id]) completedLessons[curCourse.id] = new Set();
+  completedLessons[curCourse.id].add(curChapIdx);
+  saveProgressToLocal();
+  syncProgress();
+  if (curChapIdx < curCourse.chaps.length - 1) { curChapIdx++; updateLearnUI(); }
+  if (curChapIdx === curCourse.chaps.length - 1 && completedLessons[curCourse.id].size >= curCourse.chaps.length) {
+    showToast('已完成全部课时');
+  }
+  updateLearnUI();
+}
+
+function saveProgressToLocal() {
+  const obj = {};
+  for (const [id, set] of Object.entries(completedLessons)) {
+    obj[id] = [...set];
+  }
+  try { localStorage.setItem('pbl_progress', JSON.stringify(obj)); } catch {}
+  saveEnrollmentToLocal();
+}
+
+function saveEnrollmentToLocal() {
+  try { localStorage.setItem('pbl_enrolled', JSON.stringify([...enrolled])); } catch {}
+}
+
+function restoreEnrollmentFromLocal() {
+  try {
+    const raw = localStorage.getItem('pbl_enrolled');
+    if (raw) {
+      const arr = JSON.parse(raw);
+      arr.forEach(id => enrolled.add(id));
+    }
+  } catch {}
+}
+
+function prevLesson() { if (curChapIdx > 0) { curChapIdx--; updateLearnUI(); } }
+
+function closeLearn() {
+  document.getElementById('learnView').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ── 教师端：活动发布 ──
+async function loadPublishState(lessonKey) {
+  isTeacher = currentUser && currentUser.role === 'teacher';
+  if (!serverAvailable) { currentPublishState = []; return; }
+  try {
+    const data = await apiCall('GET', '/publish-state?lessonKey=' + encodeURIComponent(lessonKey));
+    if (data) {
+      currentPublishState = data.published || [];
+      isTeacher = data.isTeacher || false;
+    } else {
+      currentPublishState = [];
+    }
+  } catch {
+    currentPublishState = [];
+  }
+}
+
+async function publishOne(lessonKey, idx) {
+  if (!serverAvailable) { showToast('服务器未连接'); return; }
+  try {
+    await apiCall('POST', '/teacher/publish', { lessonKey, activityIndex: idx });
+    showToast('活动已发布');
+    updateLearnUI();
+  } catch { showToast('发布失败'); }
+}
+
+async function unpublishOne(lessonKey, idx) {
+  if (!serverAvailable) { showToast('服务器未连接'); return; }
+  try {
+    await apiCall('POST', '/teacher/unpublish', { lessonKey, activityIndex: idx });
+    showToast('已取消发布');
+    updateLearnUI();
+  } catch { showToast('操作失败'); }
+}
+
+async function publishAll(lessonKey, total) {
+  if (!serverAvailable) return;
+  // Check if all are already published
+  if (currentPublishState.length >= total) {
+    // Unpublish all
+    for (let i = 0; i < total; i++) {
+      await apiCall('POST', '/teacher/unpublish', { lessonKey, activityIndex: i });
+    }
+    showToast('已全部取消发布');
+  } else {
+    // Publish remaining
+    for (let i = 0; i < total; i++) {
+      if (!currentPublishState.includes(i)) {
+        await apiCall('POST', '/teacher/publish', { lessonKey, activityIndex: i });
+      }
+    }
+    showToast('已全部发布');
+  }
+  updateLearnUI();
+}
+
+async function unpublishAll(lessonKey) {
+  if (!serverAvailable) return;
+  for (const idx of currentPublishState) {
+    await apiCall('POST', '/teacher/unpublish', { lessonKey, activityIndex: idx });
+  }
+  showToast('已全部取消发布');
+  updateLearnUI();
+}
+
+// ── 评价互评（讨论区） ──
+let discussionTab = 'content';
+let currentPosts = [];
+
+function switchLearnTab(tab) {
+  discussionTab = tab;
+  document.getElementById('tabContent').classList.toggle('active', tab === 'content');
+  document.getElementById('tabDiscuss').classList.toggle('active', tab === 'discussion');
+  document.getElementById('contentZone').style.display = tab === 'content' ? '' : 'none';
+  document.getElementById('discussionZone').style.display = tab === 'discussion' ? '' : 'none';
+  if (tab === 'discussion') {
+    const lessonKey = curCourse.id + '_' + curChapIdx;
+    loadPosts(lessonKey);
+  }
+}
+
+async function loadPosts(lessonKey) {
+  const postList = document.getElementById('postList');
+  const badge = document.getElementById('postCountBadge');
+  postList.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-tertiary);font-size:13px;">加载中...</div>';
+  try {
+    const data = await apiCall('GET', '/posts?lessonKey=' + encodeURIComponent(lessonKey));
+    currentPosts = Array.isArray(data) ? data : [];
+    renderPostList(currentPosts);
+    if (badge) {
+      badge.style.display = currentPosts.length ? '' : 'none';
+      badge.textContent = currentPosts.length;
+    }
+  } catch {
+    currentPosts = [];
+    postList.innerHTML = '<div class="empty-discussion"><div class="empty-icon">⚠</div><div class="empty-text">加载失败，请检查网络</div></div>';
+  }
+}
+
+function renderPostList(posts) {
+  const postList = document.getElementById('postList');
+  if (!posts.length) {
+    postList.innerHTML = '<div class="empty-discussion"><div class="empty-icon">💬</div><div class="empty-text">还没有帖子，快来发布第一条吧</div></div>';
+    return;
+  }
+  postList.innerHTML = posts.map(p => {
+    const liked = p.likes && p.likes.includes(currentUser?.id);
+    return `
+    <div class="post-card">
+      <div class="post-card-header">
+        <div class="post-avatar">${(p.username || '?')[0]}</div>
+        <div class="post-meta">
+          <div class="post-author">${escHtml(p.username)}</div>
+          <div class="post-time">${fmtTime(p.createdAt)}</div>
+          ${currentUser && currentUser.id === p.userId ? '<span style="font-size:10px;color:var(--accent);font-weight:600;">(我的帖子)</span>' : ''}
+        </div>
+      </div>
+      <div class="post-content">${escHtml(p.content)}</div>
+      <div class="post-footer">
+        <button class="post-action ${liked ? 'liked' : ''}" onclick="handleToggleLike(${p.id})">
+          <span class="action-icon">${liked ? '♥' : '♡'}</span>
+          <span id="likeCount_${p.id}">${p.likes ? p.likes.length : 0}</span>
+        </button>
+        <button class="post-action" onclick="toggleComments(${p.id})">
+          <span class="action-icon">💬</span>
+          <span id="cmtCount_${p.id}">${p.commentCount || 0}</span>
+        </button>
+      </div>
+      <div class="comment-area" id="commentArea_${p.id}">
+        <div class="comment-list" id="commentList_${p.id}"></div>
+        <div class="comment-input-row">
+          <input type="text" id="commentInput_${p.id}" placeholder="写评论..." maxlength="1000">
+          <button class="btn-sm primary" onclick="handleAddComment(${p.id})">发送</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function handleCreatePost() {
+  if (!requireAuth()) return;
+  const input = document.getElementById('postInput');
+  const content = input.value.trim();
+  if (!content) { showToast('请输入内容'); return; }
+  const lessonKey = curCourse.id + '_' + curChapIdx;
+  try {
+    await apiCall('POST', '/posts', { lessonKey, content });
+    input.value = '';
+    document.getElementById('postCharHint').textContent = '0 / 2000';
+    showToast('发布成功');
+    loadPosts(lessonKey);
+  } catch (e) {
+    showToast('发布失败');
+  }
+}
+
+async function handleToggleLike(postId) {
+  if (!requireAuth()) return;
+  try {
+    const res = await apiCall('POST', '/posts/' + postId + '/like');
+    const likeCountEl = document.getElementById('likeCount_' + postId);
+    if (likeCountEl) likeCountEl.textContent = res.likes.length;
+    // Refresh just this card's like button state
+    const post = currentPosts.find(p => p.id === postId);
+    if (post) post.likes = res.likes;
+    const lessonKey = curCourse.id + '_' + curChapIdx;
+    loadPosts(lessonKey);
+  } catch {
+    showToast('操作失败');
+  }
+}
+
+async function toggleComments(postId) {
+  const area = document.getElementById('commentArea_' + postId);
+  const isOpen = area.classList.contains('open');
+  if (isOpen) {
+    area.classList.remove('open');
+    return;
+  }
+  // Load comments
+  const list = document.getElementById('commentList_' + postId);
+  list.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary);padding:6px;">加载中...</div>';
+  try {
+    const comments = await apiCall('GET', '/posts/' + postId + '/comments');
+    if (!comments.length) {
+      list.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary);padding:6px;">暂无评论</div>';
+    } else {
+      list.innerHTML = comments.map(c => `
+        <div class="comment-item">
+          <div class="comment-avatar">${(c.username || '?')[0]}</div>
+          <div class="comment-body">
+            <span class="cmt-author">${escHtml(c.username)}</span>
+            <span class="cmt-time">${fmtTime(c.createdAt)}</span>
+            <div class="cmt-content">${escHtml(c.content)}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+    // Update comment count
+    const cmtCountEl = document.getElementById('cmtCount_' + postId);
+    if (cmtCountEl) cmtCountEl.textContent = comments.length;
+    area.classList.add('open');
+  } catch {
+    list.innerHTML = '<div style="font-size:11px;color:var(--orange);padding:6px;">加载失败</div>';
+  }
+}
+
+async function handleAddComment(postId) {
+  if (!requireAuth()) return;
+  const input = document.getElementById('commentInput_' + postId);
+  const content = input.value.trim();
+  if (!content) return;
+  try {
+    await apiCall('POST', '/posts/' + postId + '/comments', { content });
+    input.value = '';
+    toggleComments(postId); // close first
+    document.getElementById('commentArea_' + postId).classList.remove('open');
+    // Reload to update comment count, then re-open
+    const area = document.getElementById('commentArea_' + postId);
+    const list = document.getElementById('commentList_' + postId);
+    list.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary);padding:6px;">加载中...</div>';
+    const comments = await apiCall('GET', '/posts/' + postId + '/comments');
+    list.innerHTML = comments.map(c => `
+      <div class="comment-item">
+        <div class="comment-avatar">${(c.username || '?')[0]}</div>
+        <div class="comment-body">
+          <span class="cmt-author">${escHtml(c.username)}</span>
+          <span class="cmt-time">${fmtTime(c.createdAt)}</span>
+          <div class="cmt-content">${escHtml(c.content)}</div>
+        </div>
+      </div>
+    `).join('');
+    document.getElementById('cmtCount_' + postId).textContent = comments.length;
+    area.classList.add('open');
+    showToast('评论成功');
+  } catch {
+    showToast('评论失败');
+  }
+}
+
+// Post input char counter
+document.getElementById('postInput').addEventListener('input', function() {
+  const len = this.value.length;
+  const hint = document.getElementById('postCharHint');
+  hint.textContent = len + ' / 2000';
+  hint.classList.toggle('warn', len > 1800);
+});
+
+function escHtml(s) {
+  const div = document.createElement('div');
+  div.textContent = s || '';
+  return div.innerHTML;
+}
+
+function fmtTime(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const now = new Date();
+  const diff = now - d;
+  if (diff < 60000) return '刚刚';
+  if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前';
+  if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前';
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+// ── AI ──
+let chatHistory = [];
+
+function resetChatHistory() {
+  chatHistory = [];
+}
+
+async function sendAiMsg() {
+  const input = document.getElementById('aiInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  appendAiMsg('user', msg);
+  chatHistory.push({ role: 'user', content: msg });
+  input.value = '';
+
+  // Try server API first
+  if (serverAvailable) {
+    try {
+      const res = await fetch(API_BASE + '/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg, history: chatHistory.slice(0, -1) })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const prefix = data.source === 'fallback' ? '[离线模式] ' : '';
+        const suffix = data.source === 'zhipu' ? ' (智谱·GLM-4-Flash)' : '';
+        appendAiMsg('bot', prefix + data.reply + suffix);
+        chatHistory.push({ role: 'assistant', content: data.reply });
+        return;
+      }
+    } catch {}
+  }
+
+  // Fallback: local simulated responses
+  setTimeout(() => {
+    const responses = [
+      '这是个好问题。建议从课程内容出发，结合配套资源中的材料进行多角度思考。如需深入探讨，可以更具体地描述你的疑问。\n\n—— AI生成，请人工复核',
+      '让我帮你梳理：这个概念有三个理解层次——基础定义、实际应用、与其他概念的关联。你想深入了解哪一个方面？\n\n—— AI生成，请人工复核',
+      '好的，我已处理你的请求。建议重点关注关键术语的准确性和逻辑结构，根据课堂所学进一步调整优化。\n\n—— AI生成，请人工复核',
+      '理解你的困惑。这个知识点建议你先回顾上一课时的基础内容，再结合本课时的课堂任务进行实践练习，会更容易掌握。\n\n—— AI生成，请人工复核'
+    ];
+    const reply = responses[Math.floor(Math.random() * responses.length)];
+    appendAiMsg('bot', reply);
+    chatHistory.push({ role: 'assistant', content: reply });
+  }, 500);
+}
+
+async function sendQuickPrompt(prompt) {
+  appendAiMsg('user', prompt);
+  chatHistory.push({ role: 'user', content: prompt });
+
+  if (serverAvailable) {
+    try {
+      const res = await fetch(API_BASE + '/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: prompt, history: chatHistory.slice(0, -1) })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const prefix = data.source === 'fallback' ? '[离线模式] ' : '';
+        const suffix = data.source === 'zhipu' ? ' (智谱·GLM-4-Flash)' : '';
+        appendAiMsg('bot', prefix + data.reply + suffix);
+        chatHistory.push({ role: 'assistant', content: data.reply });
+        return;
+      }
+    } catch {}
+  }
+
+  setTimeout(() => {
+    const reply = '收到！以下是针对你问题的梳理。请结合课程资源和自己的理解进行验证和调整。\n\n—— AI生成，请人工复核';
+    appendAiMsg('bot', reply);
+    chatHistory.push({ role: 'assistant', content: reply });
+  }, 500);
+}
+
+function appendAiMsg(type, text) {
+  const area = document.getElementById('aiChatArea');
+  const div = document.createElement('div');
+  div.className = 'ai-msg ' + type;
+  div.textContent = text;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+}
+
+// ── Toast ──
+function showToast(msg) {
+  const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// ── Keyboard ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (document.getElementById('compareOverlay').classList.contains('open')) closeCompare();
+    else if (document.getElementById('studioView').classList.contains('open')) closeStudio();
+    else if (document.getElementById('dashboardView').classList.contains('open')) closeDashboard();
+    else if (document.getElementById('workshopView').classList.contains('open')) closeWorkshop();
+    else if (document.getElementById('learnView').classList.contains('open')) closeLearn();
+    else if (document.getElementById('modalOverlay').classList.contains('open')) closeModal();
+  }
+});
+
+function scrollToCourses() {
+  document.getElementById('coursesSection').scrollIntoView({behavior:'smooth'});
+}
+
+// ── Workshop ──
+let workshopLessonKey = '';
+let workshopWorkType = 'news';
+let workshopWorkId = null;
+let workshopDirty = false;
+let workshopAutoSaveTimer = null;
+let workshopChatHistory = [];
+let workshopAiComparison = null;
+let workshopComparisonAnalysis = {};
+
+const creationTaskInfo = {
+  poster: { icon: '🎨', name: '科普海报', spec: 'A3幅面 · 标题+主图+3-5个信息模块 · 配色协调 · 信息层次清晰' },
+  news: { icon: '📰', name: '新闻报道 + 英文简介', spec: '中文新闻500-800字（五段式结构）· 英文简介150-200词（简单句为主）' },
+  script: { icon: '🎬', name: '短视频脚本', spec: '时长60-90秒 · 分镜脚本格式 · 含画面描述+旁白/对白 · 标注BGM与特效建议' }
+};
+
+function openWorkshop(lessonKey) {
+  if (!currentUser) { showToast('请先登录'); return; }
+  workshopLessonKey = lessonKey;
+  workshopWorkType = 'news';
+  workshopWorkId = null;
+  workshopDirty = false;
+  workshopAiComparison = null;
+  workshopComparisonAnalysis = {};
+  document.getElementById('workshopTitle').value = '';
+  document.getElementById('workshopContent').value = '';
+  document.getElementById('wordCount').textContent = '0';
+  document.getElementById('workshopStatus').textContent = '草稿';
+  document.getElementById('workshopSaveStatus').textContent = '未保存';
+  document.getElementById('workshopLastSaved').textContent = '';
+  document.getElementById('btnShowCompare').style.display = 'none';
+  document.getElementById('workshopAiChat').innerHTML = `<div class="ai-msg bot">在创作工坊中，我可以帮你：<br><br>· 润色文案 — 优化你的表达<br>· 翻译成英文 — 产出英文版本<br>· 合规检查 — 核查事实准确性<br>· 生成AI对比 — 用于人机创作对比</div>`;
+  workshopChatHistory = [];
+
+  renderWorkshopTypes();
+  document.getElementById('workshopLessonLabel').textContent = '模块四 · 创作工坊';
+  document.getElementById('workshopView').classList.add('open');
+
+  // AI quick prompts for workshop
+  const prompts = document.getElementById('workshopAiPrompts');
+  prompts.innerHTML = [
+    { label: '✨ 润色文案', prompt: '请帮我润色正在创作的作品，优化逻辑和表达。' },
+    { label: '🌐 翻译成英文', prompt: '请帮我把作品翻译成适合初中生阅读的英文版本。' },
+    { label: '🔍 合规检查', prompt: '请帮我检查作品的科技事实准确性和表述规范性。' },
+  ].map(p => `<button onclick="sendWorkshopAiMsg('${p.prompt.replace(/'/g, "\\'")}')">${p.label}</button>`).join('');
+
+  // Load existing work from server
+  loadWorkshopWork();
+}
+
+function renderWorkshopTypes() {
+  const container = document.getElementById('workshopTypeOptions');
+  container.innerHTML = Object.entries(creationTaskInfo).map(([key, info]) =>
+    `<div class="workshop-type-option${key === workshopWorkType ? ' selected' : ''}" onclick="selectWorkshopType('${key}')" data-type="${key}">
+      <span class="type-icon">${info.icon}</span>
+      <div><div style="font-weight:600;">${info.name}</div></div>
+    </div>`
+  ).join('');
+  updateSpecHint();
+}
+
+function selectWorkshopType(type) {
+  workshopWorkType = type;
+  document.querySelectorAll('.workshop-type-option').forEach(el => {
+    el.classList.toggle('selected', el.dataset.type === type);
+  });
+  updateSpecHint();
+  onWorkshopChange();
+}
+
+function updateSpecHint() {
+  document.getElementById('workshopSpecHint').textContent = creationTaskInfo[workshopWorkType].spec;
+}
+
+async function loadWorkshopWork() {
+  const data = await apiCall('GET', '/works?lessonKey=' + workshopLessonKey);
+  if (data && Array.isArray(data) && data.length > 0) {
+    const work = data.find(x => x.workType === workshopWorkType) || data[0];
+    if (work) {
+      workshopWorkId = work.id;
+      workshopWorkType = work.workType || 'news';
+      document.getElementById('workshopTitle').value = work.title || '';
+      document.getElementById('workshopContent').value = work.content || '';
+      document.getElementById('wordCount').textContent = (work.content || '').length;
+      document.getElementById('workshopStatus').textContent = work.status === 'submitted' ? '已提交' : '草稿';
+      document.getElementById('workshopSaveStatus').textContent = '已加载';
+      document.getElementById('workshopLastSaved').textContent = work.updatedAt ? new Date(work.updatedAt).toLocaleString() : '';
+      workshopAiComparison = work.aiComparison || null;
+      workshopComparisonAnalysis = {};
+      try {
+        if (work.comparisonAnalysis) workshopComparisonAnalysis = JSON.parse(work.comparisonAnalysis);
+      } catch { workshopComparisonAnalysis = {}; }
+      if (workshopAiComparison) {
+        document.getElementById('btnShowCompare').style.display = '';
+      }
+      renderWorkshopTypes();
+    }
+  }
+}
+
+function onWorkshopChange() {
+  workshopDirty = true;
+  document.getElementById('wordCount').textContent = document.getElementById('workshopContent').value.length;
+  document.getElementById('workshopSaveStatus').textContent = '未保存';
+
+  // Debounced auto-save (30s)
+  clearTimeout(workshopAutoSaveTimer);
+  workshopAutoSaveTimer = setTimeout(() => {
+    if (workshopDirty) saveDraft(true);
+  }, 30000);
+}
+
+async function saveDraft(silent) {
+  if (!currentUser) { showToast('请先登录'); return; }
+  const title = document.getElementById('workshopTitle').value.trim();
+  const content = document.getElementById('workshopContent').value.trim();
+  if (!title && !content) { if (!silent) showToast('请输入标题或内容'); return; }
+
+  const body = {
+    lessonKey: workshopLessonKey,
+    workType: workshopWorkType,
+    title: title || '未命名作品',
+    content: content,
+    status: 'draft'
+  };
+
+  const data = await apiCall('POST', '/works', body);
+  if (data && data.work) {
+    workshopWorkId = data.work.id;
+    workshopDirty = false;
+    document.getElementById('workshopSaveStatus').textContent = '已保存';
+    document.getElementById('workshopLastSaved').textContent = new Date().toLocaleString();
+    document.getElementById('workshopStatus').textContent = '草稿';
+    if (!silent) showToast('草稿已保存');
+  } else {
+    if (!silent) showToast('保存失败，请检查网络');
+  }
+}
+
+async function submitWork() {
+  if (!currentUser) { showToast('请先登录'); return; }
+  const title = document.getElementById('workshopTitle').value.trim();
+  const content = document.getElementById('workshopContent').value.trim();
+  if (!title || !content) { showToast('请完成标题和内容后再提交'); return; }
+
+  const body = {
+    lessonKey: workshopLessonKey,
+    workType: workshopWorkType,
+    title: title,
+    content: content,
+    status: 'submitted'
+  };
+
+  const data = await apiCall('POST', '/works', body);
+  if (data && data.work) {
+    workshopWorkId = data.work.id;
+    workshopDirty = false;
+    document.getElementById('workshopSaveStatus').textContent = '已提交';
+    document.getElementById('workshopLastSaved').textContent = new Date().toLocaleString();
+    document.getElementById('workshopStatus').textContent = '已提交';
+    showToast('作品已提交！');
+  } else {
+    showToast('提交失败，请检查网络');
+  }
+}
+
+async function requestAICompare() {
+  if (!currentUser) { showToast('请先登录'); return; }
+  const title = document.getElementById('workshopTitle').value.trim();
+  const content = document.getElementById('workshopContent').value.trim();
+  if (!title || !content) { showToast('请先完成作品内容再生成AI对比'); return; }
+
+  // Show generating state
+  document.getElementById('btnShowCompare').style.display = 'none';
+  const chat = document.getElementById('workshopAiChat');
+  chat.innerHTML += `<div class="ai-msg bot"><div class="workshop-generating"><div class="spinner"></div>正在生成AI对比作品，请稍候...</div></div>`;
+  chat.scrollTop = chat.scrollHeight;
+
+  try {
+    const res = await fetch(API_BASE + '/ai/compare', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
+      body: JSON.stringify({
+        workType: workshopWorkType,
+        title: title,
+        content: content
+      })
+    });
+    const data = await res.json();
+    // Remove spinner
+    chat.lastChild.remove();
+
+    if (res.ok && data.aiWork) {
+      workshopAiComparison = data.aiWork;
+      document.getElementById('btnShowCompare').style.display = '';
+      // Save AI comparison to the work
+      await apiCall('POST', '/works', {
+        lessonKey: workshopLessonKey,
+        workType: workshopWorkType,
+        title: title,
+        content: content,
+        status: document.getElementById('workshopStatus').textContent === '已提交' ? 'submitted' : 'draft',
+        aiComparison: data.aiWork
+      });
+      chat.innerHTML += `<div class="ai-msg bot">✅ AI对比作品已生成！点击左侧 <b>"查看人机对比"</b> 按钮查看。</div>`;
+      showToast('AI对比作品已生成');
+    } else {
+      chat.innerHTML += `<div class="ai-msg bot">❌ 生成失败：${data.error || '请稍后重试'}</div>`;
+    }
+    chat.scrollTop = chat.scrollHeight;
+  } catch {
+    chat.lastChild && chat.lastChild.remove();
+    chat.innerHTML += `<div class="ai-msg bot">❌ 网络错误，请检查连接后重试</div>`;
+    chat.scrollTop = chat.scrollHeight;
+  }
+}
+
+function showCompareView() {
+  if (!workshopAiComparison) { showToast('请先生成AI对比作品'); return; }
+  const title = document.getElementById('workshopTitle').value.trim();
+  const content = document.getElementById('workshopContent').value.trim();
+
+  document.getElementById('compareHumanWork').innerHTML = `
+    <div class="compare-title">${escapeHtml(title || '未命名作品')}</div>
+    <div>${escapeHtml(content || '暂无内容').replace(/\n/g, '<br>')}</div>
+  `;
+  document.getElementById('compareAiWork').innerHTML = `
+    <div class="compare-title">${escapeHtml(title || '未命名作品')} <span style="font-size:12px;color:var(--text-tertiary);">（AI版）</span></div>
+    <div class="ai-tag">🤖 AI生成</div>
+    <div>${escapeHtml(workshopAiComparison).replace(/\n/g, '<br>')}</div>
+  `;
+
+  // Render comparison analysis dims
+  const dims = [
+    { key: 'accuracy', label: '准确性', desc: '科技事实是否准确、有据可查' },
+    { key: 'creativity', label: '创造性', desc: '表达形式是否有新意、吸引人' },
+    { key: 'emotion', label: '情感温度', desc: '是否打动人心、传递温度' },
+    { key: 'clarity', label: '清晰度', desc: '逻辑是否通顺、易于理解' }
+  ];
+  document.getElementById('compareDims').innerHTML = dims.map(d =>
+    `<div class="compare-dim">
+      <div class="dim-label">${d.label}</div>
+      <div class="dim-desc">${d.desc}</div>
+      <textarea placeholder="你观察到的差异..." onchange="workshopComparisonAnalysis['${d.key}']=this.value">${escapeHtml(workshopComparisonAnalysis[d.key] || '')}</textarea>
+    </div>`
+  ).join('');
+
+  document.getElementById('compareOverlay').classList.add('open');
+}
+
+function closeCompare(e) {
+  if (e && e.target !== document.getElementById('compareOverlay')) return;
+  document.getElementById('compareOverlay').classList.remove('open');
+}
+
+async function saveComparisonAnalysis() {
+  // Collect from textareas
+  document.querySelectorAll('#compareDims textarea').forEach(ta => {
+    const key = ta.closest('.compare-dim').querySelector('.dim-label').textContent;
+    const keyMap = { '准确性': 'accuracy', '创造性': 'creativity', '情感温度': 'emotion', '清晰度': 'clarity' };
+    workshopComparisonAnalysis[keyMap[key] || key] = ta.value;
+  });
+
+  const title = document.getElementById('workshopTitle').value.trim();
+  const content = document.getElementById('workshopContent').value.trim();
+
+  const data = await apiCall('POST', '/works', {
+    lessonKey: workshopLessonKey,
+    workType: workshopWorkType,
+    title: title || '未命名作品',
+    content: content,
+    status: document.getElementById('workshopStatus').textContent === '已提交' ? 'submitted' : 'draft',
+    aiComparison: workshopAiComparison,
+    comparisonAnalysis: JSON.stringify(workshopComparisonAnalysis)
+  });
+
+  if (data && data.work) {
+    showToast('对比分析已保存');
+    closeCompare();
+  } else {
+    showToast('保存失败，请检查网络');
+  }
+}
+
+async function closeWorkshop() {
+  if (workshopDirty) {
+    if (confirm('你有未保存的修改，是否保存后再退出？')) {
+      await saveDraft(true);
+    }
+  }
+  document.getElementById('workshopView').classList.remove('open');
+  clearTimeout(workshopAutoSaveTimer);
+}
+
+// ── Workshop AI Chat ──
+async function sendWorkshopAiMsg(promptOverride) {
+  const input = document.getElementById('workshopAiInput');
+  const msg = promptOverride || input.value.trim();
+  if (!msg) return;
+  if (!serverAvailable) { showToast('服务器未连接'); return; }
+
+  const chat = document.getElementById('workshopAiChat');
+  appendWorkshopChatMsg('user', msg);
+  if (!promptOverride) input.value = '';
+
+  // Get context from current work
+  const title = document.getElementById('workshopTitle').value.trim();
+  const content = document.getElementById('workshopContent').value.trim();
+  const workContext = content ? `\n\n学生当前作品（类型：${creationTaskInfo[workshopWorkType].name}）：\n标题：${title}\n内容：${content}` : '';
+
+  try {
+    const res = await fetch(API_BASE + '/ai/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
+      body: JSON.stringify({ message: msg + workContext })
+    });
+    const data = await res.json();
+    if (res.ok && data.reply) {
+      appendWorkshopChatMsg('bot', data.reply);
+    } else {
+      appendWorkshopChatMsg('bot', '抱歉，AI 助手暂时无法回复，请稍后重试。');
+    }
+  } catch {
+    appendWorkshopChatMsg('bot', '网络错误，请检查连接。');
+  }
+}
+
+function appendWorkshopChatMsg(type, text) {
+  const chat = document.getElementById('workshopAiChat');
+  const div = document.createElement('div');
+  div.className = 'ai-msg ' + type;
+  div.textContent = text;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+// ── Teacher Dashboard ──
+let dashTab = 'overview';
+let dashData = { roster: [], dashboard: null, summary: null };
+
+async function openDashboard() {
+  if (!currentUser || !isTeacher) { showToast('仅教师可访问'); return; }
+  document.getElementById('dashboardView').classList.add('open');
+  switchDashTab('overview');
+}
+
+function closeDashboard() {
+  document.getElementById('dashboardView').classList.remove('open');
+}
+
+async function switchDashTab(tab) {
+  dashTab = tab;
+  document.querySelectorAll('.dashboard-tab').forEach(t => t.classList.toggle('active', t.dataset.id === 'dashTab' + tab.charAt(0).toUpperCase() + tab.slice(1)));
+  // Update tab active states by matching onclick
+  document.querySelectorAll('.dashboard-tab').forEach(t => {
+    const onclick = t.getAttribute('onclick') || '';
+    t.classList.toggle('active', onclick.includes(`'${tab}'`));
+  });
+  const body = document.getElementById('dashboardBody');
+
+  switch (tab) {
+    case 'overview': await renderOverview(body); break;
+    case 'roster': await renderRoster(body); break;
+    case 'works': await renderWorksReview(body); break;
+    case 'summary': await renderSummary(body); break;
+    case 'analysis': await renderAnalysis(body); break;
+  }
+}
+
+async function loadDashData() {
+  const [roster, dashboard] = await Promise.all([
+    apiCall('GET', '/teacher/roster'),
+    apiCall('GET', '/teacher/dashboard')
+  ]);
+  dashData.roster = roster || [];
+  dashData.dashboard = dashboard || {};
+}
+
+async function renderOverview(body) {
+  await loadDashData();
+  const d = dashData.dashboard;
+  body.innerHTML = `
+    <div class="stat-cards">
+      <div class="stat-card accent"><div class="stat-val">${d.studentCount || 0}</div><div class="stat-lbl">班级学生数</div></div>
+      <div class="stat-card green"><div class="stat-val">${d.completionRate || 0}%</div><div class="stat-lbl">整体完成率</div></div>
+      <div class="stat-card orange"><div class="stat-val">${d.worksSubmitted || 0}</div><div class="stat-lbl">已提交作品</div></div>
+      <div class="stat-card"><div class="stat-val">${d.postsTotal || 0}</div><div class="stat-lbl">讨论帖数</div></div>
+    </div>
+    <div class="module-bars">
+      ${[1,2,3,4].map(m => {
+        const modMax = (d.studentCount || 1) * 3;
+        const modVal = d.moduleStats ? (d.moduleStats[String(m)] || 0) : 0;
+        const pct = Math.round(modVal / modMax * 100);
+        return `<div class="module-bar-item">
+          <div class="mod-name">模块${m}</div>
+          <div class="mod-count">${modVal}<span style="font-size:11px;color:var(--text-tertiary);"> / ${modMax}</span></div>
+          <div class="mod-bar"><div class="mod-fill" style="width:${pct}%"></div></div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="dashboard-grid">
+      <div class="stat-card">
+        <div class="stat-lbl">今日活跃</div>
+        <div class="stat-val" style="font-size:22px;">${d.activeToday || 0} 人</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-lbl">评论总数</div>
+        <div class="stat-val" style="font-size:22px;">${d.commentsTotal || 0}</div>
+      </div>
+    </div>
+    <div class="stat-card" style="text-align:center;">
+      <div class="stat-lbl">最近提交</div>
+      <div style="font-size:28px;font-weight:700;color:var(--accent);">${d.worksSubmitted || 0}</div>
+      <div class="stat-lbl">份学生作品待评阅</div>
+      <button class="btn btn-accent" style="margin-top:12px;" onclick="switchDashTab('works')">前往评阅 →</button>
+    </div>`;
+}
+
+async function renderRoster(body) {
+  await loadDashData();
+  const roster = dashData.roster;
+  if (!roster.length) { body.innerHTML = '<div class="analysis-empty">暂无学生数据</div>'; return; }
+  body.innerHTML = `<div class="roster-table-wrap"><table class="roster-table">
+    <thead><tr>
+      <th>学生</th><th>学习进度 (12课时)</th><th>完成</th><th>作品</th><th>已提交</th><th>最近活跃</th><th>操作</th>
+    </tr></thead>
+    <tbody>${roster.map(s => {
+      const fullLessons = 12;
+      const dots = [];
+      // Generate 12 dot slots based on enrolled/completed logic
+      for (let mod = 1; mod <= 4; mod++) {
+        for (let ch = 0; ch < 3; ch++) {
+          const key = mod + '_' + ch;
+          // We approximate: if student has enrolled courses, check via completed
+          const done = s.completed >= (mod - 1) * 3 + ch + 1;
+          dots.push(`<span class="progress-dot${done ? ' done' : ''}" title="模块${mod} 课时${ch+1}"></span>`);
+        }
+      }
+      const doneDots = Math.min(12, Math.round(s.completed / 12 * 12));
+      return `<tr>
+        <td style="font-weight:600;">${escapeHtml(s.username)}</td>
+        <td><div class="progress-dots">${dots.map((d, i) => i < doneDots ? d.replace('progress-dot"', 'progress-dot done"') : d).join('')}</div></td>
+        <td>${s.completed}/12</td>
+        <td>${s.works}</td>
+        <td>${s.submitted}</td>
+        <td style="font-size:11px;color:var(--text-tertiary);">${s.lastActive ? new Date(s.lastActive).toLocaleDateString() : '-'}</td>
+        <td><div class="roster-actions">
+          <button onclick="viewStudentWorks('${s.id}', '${escapeHtml(s.username)}')">查看作品</button>
+        </div></td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table></div>`;
+}
+
+async function renderWorksReview(body) {
+  // Get all submitted works
+  const works = await apiCall('GET', '/works');
+  if (!works || !works.length) { body.innerHTML = '<div class="analysis-empty">暂无学生作品</div>'; return; }
+  // Group by student
+  const sorted = [...works].sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+  body.innerHTML = sorted.map(w => `
+    <div class="review-panel">
+      <div class="review-work-title">${escapeHtml(w.title)}</div>
+      <div class="review-work-meta">
+        ${escapeHtml(w.username)} · ${w.workType === 'poster' ? '科普海报' : w.workType === 'news' ? '新闻报道' : '短视频脚本'} · ${w.status === 'submitted' ? '✅ 已提交' : '📝 草稿'} · ${w.updatedAt ? new Date(w.updatedAt).toLocaleString() : ''}
+      </div>
+      <div class="review-work-content">${escapeHtml(w.content).replace(/\n/g, '<br>')}</div>
+      ${w.aiComparison ? `<div style="margin-bottom:8px;font-size:11px;color:var(--accent);">🤖 已有AI对比作品</div>` : ''}
+      <div class="review-form" id="reviewForm_${w.id}">
+        <input type="number" class="score-input" id="score_${w.id}" placeholder="评分" min="0" max="100" onchange="submitReview(${w.id})">
+        <input type="text" class="comment-input" id="comment_${w.id}" placeholder="评语（选填）" onchange="submitReview(${w.id})">
+        <span class="review-saved" id="reviewSaved_${w.id}" style="display:none;">已保存 ✓</span>
+      </div>
+    </div>
+  `).join('') + '<div style="text-align:center;padding:20px;color:var(--text-tertiary);">—— 共 ' + sorted.length + ' 份作品 ——</div>';
+
+  // Load existing reviews
+  const reviews = await apiCall('GET', '/reviews');
+  if (reviews) {
+    reviews.forEach(r => {
+      const scoreEl = document.getElementById('score_' + r.workId);
+      const commentEl = document.getElementById('comment_' + r.workId);
+      const savedEl = document.getElementById('reviewSaved_' + r.workId);
+      if (scoreEl) scoreEl.value = r.score;
+      if (commentEl) commentEl.value = r.comment || '';
+      if (savedEl) savedEl.style.display = '';
+    });
+  }
+}
+
+async function submitReview(workId) {
+  const score = parseFloat(document.getElementById('score_' + workId).value) || 0;
+  const comment = document.getElementById('comment_' + workId).value.trim();
+  if (!score && !comment) return;
+  const data = await apiCall('POST', '/reviews', { workId, score, comment });
+  if (data && data.ok) {
+    const savedEl = document.getElementById('reviewSaved_' + workId);
+    if (savedEl) { savedEl.style.display = ''; setTimeout(() => { savedEl.style.display = 'none'; }, 2000); }
+  }
+}
+
+async function viewStudentWorks(userId, username) {
+  const works = await apiCall('GET', '/works');
+  if (!works) return;
+  const sw = works.filter(w => w.userId === userId);
+  const body = document.getElementById('dashboardBody');
+  body.innerHTML = `<div style="margin-bottom:16px;">
+    <button class="btn-sm ghost" onclick="switchDashTab('roster')">← 返回名册</button>
+    <span style="font-size:15px;font-weight:700;margin-left:12px;">${escapeHtml(username)} 的作品</span>
+  </div>` + (sw.length ? sw.map(w => `
+    <div class="review-panel">
+      <div class="review-work-title">${escapeHtml(w.title)}</div>
+      <div class="review-work-meta">${w.workType === 'poster' ? '科普海报' : w.workType === 'news' ? '新闻报道' : '短视频脚本'} · ${w.status === 'submitted' ? '✅ 已提交' : '📝 草稿'}</div>
+      <div class="review-work-content">${escapeHtml(w.content).replace(/\n/g, '<br>')}</div>
+      <div class="review-form" id="reviewForm_${w.id}">
+        <input type="number" class="score-input" id="score_${w.id}" placeholder="评分" min="0" max="100" onchange="submitReview(${w.id})">
+        <input type="text" class="comment-input" id="comment_${w.id}" placeholder="评语" onchange="submitReview(${w.id})">
+        <span class="review-saved" id="reviewSaved_${w.id}" style="display:none;">已保存 ✓</span>
+      </div>
+    </div>
+  `).join('') : '<div class="analysis-empty">该学生暂无作品</div>');
+
+  // Load existing reviews
+  const reviews = await apiCall('GET', '/reviews');
+  if (reviews) {
+    reviews.forEach(r => {
+      const scoreEl = document.getElementById('score_' + r.workId);
+      const commentEl = document.getElementById('comment_' + r.workId);
+      const savedEl = document.getElementById('reviewSaved_' + r.workId);
+      if (scoreEl) scoreEl.value = r.score;
+      if (commentEl) commentEl.value = r.comment || '';
+      if (savedEl) savedEl.style.display = '';
+    });
+  }
+}
+
+async function renderSummary(body) {
+  const summary = await apiCall('GET', '/teacher/summary');
+  if (!summary) { body.innerHTML = '<div class="analysis-empty">暂无数据</div>'; return; }
+  const lessonNames = {
+    '1_0': 'M1-1 城市探索', '1_1': 'M1-2 产业寻链', '1_2': 'M1-3 政策解析',
+    '2_0': 'M2-1 智感启程', '2_1': 'M2-2 竞速评测', '2_2': 'M2-3 未来竞创',
+    '3_0': 'M3-1 数据起跑', '3_1': 'M3-2 原理分析', '3_2': 'M3-3 策略设计',
+    '4_0': 'M4-1 传播初探', '4_1': 'M4-2 创意工坊', '4_2': 'M4-3 发布迭代'
+  };
+  const entries = Object.entries(summary.byLesson || {}).sort();
+  body.innerHTML = `
+    <div class="stat-cards" style="grid-template-columns:repeat(3,1fr);">
+      <div class="stat-card accent"><div class="stat-val">${summary.totalPosts}</div><div class="stat-lbl">讨论帖总数</div></div>
+      <div class="stat-card green"><div class="stat-val">${summary.totalComments}</div><div class="stat-lbl">评论总数</div></div>
+      <div class="stat-card orange"><div class="stat-val">${summary.totalWorks}</div><div class="stat-lbl">作品总数</div></div>
+    </div>
+    <table class="summary-table">
+      <thead><tr><th>课时</th><th>帖子</th><th>评论</th><th>点赞</th><th>作品</th><th>活跃度</th></tr></thead>
+      <tbody>${entries.map(([k, v]) => {
+        const total = v.posts + v.comments + v.likes + v.works;
+        const bar = Math.min(100, total * 5);
+        return `<tr>
+          <td style="font-weight:600;">${lessonNames[k] || k}</td>
+          <td>${v.posts}</td><td>${v.comments}</td><td>${v.likes}</td><td>${v.works}</td>
+          <td><div style="height:6px;background:var(--border-light);border-radius:3px;width:100px;"><div style="height:100%;background:var(--accent);border-radius:3px;width:${bar}%;"></div></div></td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>`;
+}
+
+async function renderAnalysis(body) {
+  body.innerHTML = `<div class="analysis-card">
+    <h4>🤖 AI 学情分析</h4>
+    <div class="workshop-generating" id="analysisLoading">
+      <div class="spinner"></div>正在生成学情分析，请稍候...
+    </div>
+    <div class="analysis-body" id="analysisResult" style="display:none;"></div>
+  </div>`;
+
+  await loadDashData();
+  try {
+    const res = await fetch(API_BASE + '/ai/analysis', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
+      body: JSON.stringify({ roster: dashData.roster, dashboard: dashData.dashboard })
+    });
+    const data = await res.json();
+    document.getElementById('analysisLoading').style.display = 'none';
+    const result = document.getElementById('analysisResult');
+    result.style.display = '';
+    result.textContent = data.analysis || '分析生成失败，请重试。';
+  } catch {
+    document.getElementById('analysisLoading').style.display = 'none';
+    document.getElementById('analysisResult').style.display = '';
+    document.getElementById('analysisResult').textContent = '网络错误，请检查连接后重试。';
+  }
+}
+
+// ── Module 1 Interactive Map ──
+function initLeafletMap(mapId) {
+  var el = document.getElementById(mapId);
+  if (!el || el._mapInited) return;
+  el._mapInited = true;
+
+  // Ensure container has visible dimensions
+  if (el.offsetWidth === 0 || el.offsetHeight === 0) {
+    el.style.minHeight = '460px';
+    console.log('[Map] container had zero size, forcing min-height');
+  }
+
+  // Fix Leaflet default icon paths
+  L.Icon.Default.prototype.options.iconUrl = '/lib/images/marker-icon.png';
+  L.Icon.Default.prototype.options.iconRetinaUrl = '/lib/images/marker-icon-2x.png';
+  L.Icon.Default.prototype.options.shadowUrl = '/lib/images/marker-shadow.png';
+
+  var map = L.map(mapId, {
+    center: [39.79, 116.50],
+    zoom: 12,
+    zoomControl: true
+  });
+
+  // China-accessible tile sources (no API key needed)
+  var amapTiles = L.tileLayer('https://webrd01.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
+    attribution: '&copy; 高德地图', maxZoom: 18
+  });
+  var osmTiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap', maxZoom: 18
+  });
+  var geoTiles = L.tileLayer('https://map.geoq.cn/ArcGIS/rest/services/ChinaOnlineCommunity/MapServer/tile/{z}/{y}/{x}', {
+    attribution: '&copy; GeoQ', maxZoom: 18
+  });
+  amapTiles.addTo(map);
+
+  // Tile error fallback
+  amapTiles.on('tileerror', function() {
+    if (!map._fellBack) {
+      map._fellBack = true;
+      map.removeLayer(amapTiles);
+      geoTiles.addTo(map);
+      console.log('[Map] 高德瓦片加载失败，已切换到GeoQ');
+    }
+  });
+
+  L.control.scale({ metric: true, imperial: false, position: 'bottomleft' }).addTo(map);
+
+  // Shared marker icon
+  var mkIcon = L.icon({
+    iconUrl: '/lib/images/marker-icon.png',
+    iconRetinaUrl: '/lib/images/marker-icon-2x.png',
+    shadowUrl: '/lib/images/marker-shadow.png',
+    iconSize: [25, 41], iconAnchor: [12, 41],
+    popupAnchor: [1, -34], shadowSize: [41, 41]
+  });
+
+  // Markers
+  var tiananmen = L.marker([39.9087, 116.3975], { icon: mkIcon })
+    .bindPopup('<b>天安门</b><br>北京市中心<br>距亦庄直线约 <b>18 km</b><br>地铁通勤约 <b>60 min</b>');
+
+  var nanhaizi = L.marker([39.777, 116.468], { icon: mkIcon })
+    .bindPopup('<b>🏁 南海子公园 — 赛事起点</b><br>北京最大湿地公园<br>绿化覆盖率超 <b>60%</b><br>"从生态到科创"路线叙事起点');
+
+  var kechuang = L.marker([39.802, 116.518], { icon: mkIcon })
+    .bindPopup('<b>🔬 亦庄科创街区</b><br>机器人产业集群核心<br>小米机器人 · 优必选 · 宇树科技');
+
+  var finish = L.marker([39.806, 116.524], { icon: mkIcon })
+    .bindPopup('<b>🏆 赛事终点</b><br>科创园区中心广场<br>半马全程 21.0975 km');
+
+  // Yizhuang area
+  var yzPoly = L.polygon([
+    [39.760, 116.440], [39.760, 116.540],
+    [39.820, 116.540], [39.820, 116.440]
+  ], {
+    color: '#1a56db', weight: 2, fillColor: '#1a56db',
+    fillOpacity: 0.06, dashArray: '6 4'
+  }).bindPopup('<b>亦庄新城</b><br>规划面积约 225 km²');
+
+  // Marathon route
+  var route = L.polyline([
+    [39.777, 116.468], [39.783, 116.478],
+    [39.788, 116.488], [39.792, 116.496],
+    [39.798, 116.508], [39.802, 116.518],
+    [39.806, 116.524]
+  ], {
+    color: '#ea5a0c', weight: 4, dashArray: '10 6', lineCap: 'round'
+  }).bindPopup('<b>🏃 赛事路线（示意）</b><br>南海子公园 → 科创街区<br>"从生态到科创"城市空间叙事');
+
+  // Distance line
+  var distLine = L.polyline([
+    [39.9087, 116.3975], [39.790, 116.500]
+  ], {
+    color: '#1a56db', weight: 2, dashArray: '4 4', opacity: 0.5
+  }).bindPopup('天安门 → 亦庄 ≈ 18 km（直线距离）');
+
+  // Layer groups
+  var markersGroup = L.layerGroup([tiananmen, nanhaizi, kechuang, finish]);
+  var routeGroup = L.layerGroup([route]);
+  var distGroup = L.layerGroup([distLine]);
+  var yzGroup = L.layerGroup([yzPoly]);
+
+  // Add all by default
+  markersGroup.addTo(map);
+  routeGroup.addTo(map);
+  distGroup.addTo(map);
+  yzGroup.addTo(map);
+
+  // Layer control
+  L.control.layers(
+    {
+      '高德街道图': amapTiles,
+      'OSM 街道图': osmTiles,
+      'GeoQ 街道图': geoTiles
+    },
+    {
+      '📍 关键地点': markersGroup,
+      '🏃 赛事路线': routeGroup,
+      '📐 天安门→亦庄测距': distGroup,
+      '🏙 亦庄新城范围': yzGroup
+    },
+    { position: 'topright', collapsed: false }
+  ).addTo(map);
+
+  setTimeout(function() { map.invalidateSize(); }, 300);
+}
+
+// ── Design Studio ──
+var studioCtx = null, studioTool = 'pen', studioColor = '#1a56db', studioBrushSize = 2;
+var studioDrawing = false, studioUndoStack = [], studioLabels = [];
+
+var studioSysTags = [
+  { id:'sense', label:'📡 感知系统', color:'#1a56db', desc:'传感器类型/采样频率/精度' },
+  { id:'decide', label:'🧠 决策系统', color:'#ea5a0c', desc:'推理速度/控制频率/延迟<50ms' },
+  { id:'motion', label:'⚡ 运动执行', color:'#0d9488', desc:'关节力矩/步频/步幅/落足精度' },
+  { id:'energy', label:'🔋 能源系统', color:'#7c3aed', desc:'电池容量/能量密度/续航≥25km' },
+  { id:'cooling', label:'❄️ 散热系统', color:'#dc2626', desc:'散热功率/冷却方式/温升<30℃' }
+];
+
+function openDesignStudio() {
+  document.getElementById('studioView').classList.add('open');
+  document.getElementById('studioTagList').innerHTML = studioSysTags.map(t =>
+    `<div class="studio-tag" draggable="false" onclick="studioPlaceLabel('${t.id}')" style="cursor:pointer;">
+      <span class="tag-dot" style="background:${t.color};"></span>
+      <div><div style="font-weight:600;">${t.label}</div><div style="font-size:10px;color:var(--text-tertiary);">${t.desc}</div></div>
+    </div>`
+  ).join('');
+  document.getElementById('studioParams').innerHTML = `
+    <b>赛道约束参考：</b><br>
+    平地 ~65% · 坡道(≤8%) ~15%<br>
+    弯道(含90°锐角) ~15%<br>
+    石板/窄路 ~5% · 侧风 3-5级<br>
+    <b>硬性约束：</b>总功耗≤150W · 总重≤5kg<br>
+    电池<8kg · 续航≥25km · 温升<30℃`;
+
+  studioUndoStack = [];
+  studioLabels = [];
+  setTimeout(function() { studioInitCanvas(); }, 200);
+
+  // Load saved design
+  if (currentUser) {
+    apiCall('GET', '/works?lessonKey=2_2').then(function(data) {
+      if (data && data.length) {
+        var w = data.find(function(x) { return x.workType === 'design'; }) || data[0];
+        if (w && w.content) {
+          try {
+            var saved = JSON.parse(w.content);
+            document.getElementById('studioNotes').value = saved.notes || '';
+            if (saved.canvas) {
+              var img = new Image();
+              img.onload = function() {
+                if (studioCtx) { studioCtx.drawImage(img, 0, 0); studioPushUndo(); }
+              };
+              img.src = saved.canvas;
+            }
+            if (saved.labels) studioLabels = saved.labels;
+          } catch(e) {}
+        }
+      }
+    });
+  }
+}
+
+function closeStudio() {
+  document.getElementById('studioView').classList.remove('open');
+}
+
+function studioInitCanvas() {
+  var wrap = document.getElementById('studioCanvasWrap');
+  var canvas = document.getElementById('studioCanvas');
+  canvas.width = wrap.clientWidth;
+  canvas.height = Math.max(520, wrap.clientHeight);
+  studioCtx = canvas.getContext('2d');
+  studioCtx.fillStyle = '#ffffff';
+  studioCtx.fillRect(0, 0, canvas.width, canvas.height);
+  studioCtx.lineCap = 'round';
+  studioCtx.lineJoin = 'round';
+  studioPushUndo();
+
+  canvas.addEventListener('mousedown', studioMouseDown);
+  canvas.addEventListener('mousemove', studioMouseMove);
+  canvas.addEventListener('mouseup', studioMouseUp);
+  canvas.addEventListener('mouseleave', studioMouseUp);
+  // Touch support
+  canvas.addEventListener('touchstart', function(e) { e.preventDefault(); var t = e.touches[0]; studioMouseDown({ offsetX: t.clientX - canvas.getBoundingClientRect().left, offsetY: t.clientY - canvas.getBoundingClientRect().top }); });
+  canvas.addEventListener('touchmove', function(e) { e.preventDefault(); var t = e.touches[0]; studioMouseMove({ offsetX: t.clientX - canvas.getBoundingClientRect().left, offsetY: t.clientY - canvas.getBoundingClientRect().top }); });
+  canvas.addEventListener('touchend', function(e) { studioMouseUp(); });
+
+  // Redraw labels
+  studioRedrawLabels();
+}
+
+function studioPushUndo() {
+  if (!studioCtx) return;
+  studioUndoStack.push(studioCtx.getImageData(0, 0, studioCtx.canvas.width, studioCtx.canvas.height));
+  if (studioUndoStack.length > 30) studioUndoStack.shift();
+}
+
+function studioUndo() {
+  if (studioUndoStack.length < 2) return;
+  studioUndoStack.pop();
+  var prev = studioUndoStack[studioUndoStack.length - 1];
+  studioCtx.putImageData(prev, 0, 0);
+  studioRedrawLabels();
+}
+
+function studioClear() {
+  if (!studioCtx || !confirm('确定清空画布？此操作可撤销。')) return;
+  studioCtx.fillStyle = '#ffffff';
+  studioCtx.fillRect(0, 0, studioCtx.canvas.width, studioCtx.canvas.height);
+  studioLabels = [];
+  studioPushUndo();
+}
+
+function studioSetTool(tool) {
+  studioTool = tool;
+  document.getElementById('toolPen').classList.toggle('active', tool === 'pen');
+  document.getElementById('toolEraser').classList.toggle('active', tool === 'eraser');
+  document.getElementById('studioCanvas').style.cursor = tool === 'eraser' ? 'cell' : 'crosshair';
+}
+
+function studioMouseDown(e) {
+  studioDrawing = true;
+  var x = e.offsetX, y = e.offsetY;
+  studioCtx.beginPath();
+  studioCtx.moveTo(x, y);
+  studioCtx.strokeStyle = studioTool === 'eraser' ? '#ffffff' : studioColor;
+  studioCtx.lineWidth = studioTool === 'eraser' ? studioBrushSize * 4 : studioBrushSize;
+  studioCtx.globalCompositeOperation = studioTool === 'eraser' ? 'destination-out' : 'source-over';
+  studioLastX = x; studioLastY = y;
+}
+
+var studioLastX = 0, studioLastY = 0;
+
+function studioMouseMove(e) {
+  if (!studioDrawing || studioTool === 'shape') return;
+  var x = e.offsetX, y = e.offsetY;
+  studioCtx.lineTo(x, y);
+  studioCtx.stroke();
+  studioLastX = x; studioLastY = y;
+}
+
+function studioMouseUp() {
+  if (!studioDrawing) return;
+  studioDrawing = false;
+  studioCtx.globalCompositeOperation = 'source-over';
+  studioCtx.closePath();
+  studioPushUndo();
+}
+
+function studioDrawShape(type) {
+  var canvas = studioCtx.canvas;
+  var cx = canvas.width / 2, cy = canvas.height / 2;
+  studioCtx.strokeStyle = studioColor;
+  studioCtx.lineWidth = studioBrushSize;
+  studioCtx.fillStyle = studioColor + '20';
+  studioCtx.beginPath();
+  if (type === 'rect') {
+    studioCtx.rect(cx - 80, cy - 60, 160, 120);
+  } else if (type === 'circle') {
+    studioCtx.arc(cx, cy - 40, 50, 0, Math.PI * 2);
+  }
+  studioCtx.fill();
+  studioCtx.stroke();
+  studioCtx.closePath();
+  studioPushUndo();
+}
+
+function studioAddLabel() {
+  var text = prompt('输入标注文字：', '');
+  if (!text) return;
+  var canvas = studioCtx.canvas;
+  var cx = canvas.width / 2, cy = canvas.height / 2;
+  studioCtx.font = 'bold 14px -apple-system, sans-serif';
+  studioCtx.fillStyle = studioColor;
+  studioCtx.fillText(text, cx, cy);
+  studioPushUndo();
+}
+
+function studioPlaceLabel(tagId) {
+  var tag = studioSysTags.find(function(t) { return t.id === tagId; });
+  if (!tag) return;
+  var canvas = studioCtx.canvas;
+  var cx = canvas.width / 2, cy = 100 + studioLabels.length * 40;
+  studioCtx.font = 'bold 13px -apple-system, "PingFang SC", sans-serif';
+  studioCtx.fillStyle = tag.color;
+  studioCtx.fillText(tag.label, cx - 40, cy);
+  // Draw connector dot
+  studioCtx.beginPath();
+  studioCtx.arc(cx - 48, cy - 4, 4, 0, Math.PI * 2);
+  studioCtx.fillStyle = tag.color;
+  studioCtx.fill();
+  studioLabels.push({ id: tagId, x: cx - 40, y: cy, color: tag.color, label: tag.label });
+  studioPushUndo();
+}
+
+function studioRedrawLabels() {
+  studioLabels.forEach(function(l) {
+    studioCtx.font = 'bold 13px -apple-system, "PingFang SC", sans-serif';
+    studioCtx.fillStyle = l.color;
+    studioCtx.fillText(l.label, l.x, l.y);
+    studioCtx.beginPath();
+    studioCtx.arc(l.x - 8, l.y - 4, 4, 0, Math.PI * 2);
+    studioCtx.fill();
+  });
+}
+
+async function studioSave() {
+  if (!studioCtx) return;
+  var canvas = studioCtx.canvas;
+  var dataURL = canvas.toDataURL('image/png');
+  var notes = document.getElementById('studioNotes').value.trim();
+  var design = JSON.stringify({ canvas: dataURL, notes: notes, labels: studioLabels });
+
+  if (!currentUser) { showToast('请先登录再保存'); return; }
+  var data = await apiCall('POST', '/works', {
+    lessonKey: '2_2',
+    workType: 'design',
+    title: '机器人设计方案',
+    content: design,
+    status: 'draft'
+  });
+  if (data && data.ok) {
+    showToast('设计已保存！');
+  } else {
+    // Data URL too large? Save notes at minimum
+    var fallback = await apiCall('POST', '/works', {
+      lessonKey: '2_2',
+      workType: 'design',
+      title: '机器人设计方案',
+      content: JSON.stringify({ notes: notes, labels: studioLabels }),
+      status: 'draft'
+    });
+    if (fallback && fallback.ok) showToast('设计说明已保存（图像过大，仅保存了文字）');
+    else showToast('保存失败，请检查网络');
+  }
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// Render is called in the async init block above
+</script>
+</body>
+</html>
