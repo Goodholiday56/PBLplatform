@@ -1,0 +1,12 @@
+{
+  "name": "pbl-platform",
+  "version": "1.0.0",
+  "description": "人机共跑 — 跨学科PBL教学平台",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
