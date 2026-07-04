@@ -95,6 +95,8 @@ function readJSON(filename) {
 function writeJSON(filename, data) {
   const filepath = path.join(DATA_DIR, filename);
   _jsonCache.set(filename, data);
+  // 立即更新 mtime，防止异步写盘期间 readJSON 读到旧文件
+  _jsonMtime.set(filename, Date.now());
   fs.writeFile(filepath, JSON.stringify(data, null, 2), 'utf-8', (err) => {
     if (!err) {
       try { _jsonMtime.set(filename, fs.statSync(filepath).mtimeMs); } catch {}
