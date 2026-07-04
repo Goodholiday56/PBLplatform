@@ -2,5 +2,8 @@ node_modules/
 .env
 data/
 操作文档.md
+CLAUDE.md
+项目背景.md
+PRD-人机共跑教学平台.md
 .DS_Store
 Thumbs.db
