@@ -2546,15 +2546,13 @@ async function updateLearnUI() {
 
   // 收集当前课时的实际资源文件（仅已发布活动，教师可见全部）
   const matKey = curCourse.id + '_' + curChapIdx;
-  const mat = typeof lessonMaterials !== 'undefined' ? lessonMaterials[matKey] : null;
+  const acts = typeof lessonActivities !== 'undefined' ? (lessonActivities[matKey] || []) : [];
   const allActFiles = [];
-  if (mat && mat.activityResources) {
-    for (const [idx, files] of Object.entries(mat.activityResources)) {
-      if (isTeacher || currentPublishState.includes(parseInt(idx))) {
-        allActFiles.push(...files);
-      }
+  acts.forEach((act, idx) => {
+    if ((isTeacher || currentPublishState.includes(idx)) && act.resources) {
+      allActFiles.push(...act.resources);
     }
-  }
+  });
   if (allActFiles.length) {
     document.getElementById('learnResourcesBody').innerHTML = allActFiles.map(f => {
       const name = f.split('/').pop();
