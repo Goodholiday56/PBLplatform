@@ -2753,14 +2753,15 @@ function renderActivityCards(lessonKey, acts, isTeacher) {
       </div>` : ''}
       <div class="activity-cards-row" id="activityCardsRow">
         ${acts.map((act, i) => {
-          const isPub = isTeacher || pubSet.has(i);
+          const isPub = pubSet.has(i);           // 只看实际发布状态
+          const canClick = isTeacher || isPub;    // 教师可点全部，学生只能点已发布
           const isActive = i === selectedActivity;
           const badge = isTeacher ? (isPub ? '<span class="ac-badge pub">已发布</span>' : '<span class="ac-badge draft">未发布</span>') : '';
           return `
-          <div class="activity-card ${isActive ? 'active' : ''} ${!isPub && !isTeacher ? 'locked' : ''}"
-               ${isPub || isTeacher ? `onclick="selectActivity(${i})"` : ''}
-               title="${isPub || isTeacher ? act.title : '该活动尚未发布'}">
-            <div class="ac-num">活动${i + 1} ${!isPub && !isTeacher ? '🔒' : ''}</div>
+          <div class="activity-card ${isActive ? 'active' : ''} ${!canClick ? 'locked' : ''}"
+               ${canClick ? `onclick="selectActivity(${i})"` : ''}
+               title="${canClick ? act.title : '该活动尚未发布'}">
+            <div class="ac-num">活动${i + 1} ${!canClick ? '🔒' : (isPub ? ' ✓' : '')}</div>
             <div class="ac-title">${act.title}</div>
             <div class="ac-time">⏱ ${act.time}</div>
             ${badge}
