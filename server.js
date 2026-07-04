@@ -784,7 +784,7 @@ async function handleAPI(req, res) {
     const user = authUser(req);
     sendJSON(res, 200, {
       published: all[lessonKey] || [],
-      isTeacher: user && user.role === 'teacher'
+      isTeacher: !!(user && user.role === 'teacher')
     });
     return;
   }
