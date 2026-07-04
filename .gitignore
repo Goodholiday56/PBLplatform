@@ -1,5 +1,6 @@
 node_modules/
 .env
 data/
+操作文档.md
 .DS_Store
 Thumbs.db
