@@ -10,7 +10,7 @@ const HOST = '0.0.0.0';
 const DATA_DIR = path.join(__dirname, 'data');
 
 // ── DeepSeek 配置 ──
-const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY ;
+const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY || 'sk-9e8fff585d084d0893163ee87fc2f202';
 const DEEPSEEK_API_URL = 'https://api.deepseek.com/chat/completions';
 const DEEPSEEK_MODEL = 'deepseek-chat';
 
