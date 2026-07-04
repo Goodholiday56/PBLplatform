@@ -25,6 +25,12 @@
     --green-light:   #e6f7f5;
     --orange:        #ea5a0c;
     --orange-light:  #fef3eb;
+    --purple:        #6d28d9;
+    --purple-light:  #f3eeff;
+    --destructive:   #dc2626;
+    --destructive-light: #fef2f2;
+    --liked:         #e74c3c;
+    --content-bg:    #f9f9f9;
     --shadow-sm:     0 1px 2px rgba(0,0,0,0.04);
     --shadow-md:     0 4px 12px rgba(0,0,0,0.06);
     --shadow-lg:     0 12px 40px rgba(0,0,0,0.08);
@@ -359,7 +365,7 @@
     border: 2px solid #1a56db33; border-radius: 2px;
     box-shadow: inset 0 0 0 6px #fff, inset 0 0 0 8px #1a56db22;
   }
-  .thumb-robot  { background: linear-gradient(135deg, #f3eeff 0%, #f8f5ff 100%); color: #6d28d9; }
+  .thumb-robot  { background: linear-gradient(135deg, var(--purple-light) 0%, #f8f5ff 100%); color: var(--purple); }
   .thumb-robot::after  {
     width: 22px; height: 22px;
     border: 2px solid #6d28d933;
@@ -388,7 +394,7 @@
     padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;
   }
   .tag-m1  { background: #e8f0fe; color: #1a56db; }
-  .tag-m2  { background: #f3e8ff; color: #6d28d9; }
+  .tag-m2  { background: var(--purple-light); color: var(--purple); }
   .tag-m3  { background: #fff7ed; color: #ea5a0c; }
   .tag-m4  { background: #e6f7f5; color: #0d9488; }
 
@@ -515,7 +521,7 @@
   }
   .content-zone {
     flex: 1; min-height: 0;
-    background: #f9f9f9;
+    background: var(--content-bg);
     overflow-y: auto; overflow-x: hidden;
     padding: 24px 32px;
   }
@@ -696,7 +702,7 @@
     border-radius: 2px; overflow: hidden;
   }
   .progress-fill {
-    height: 100%; background: linear-gradient(90deg, var(--accent), #3b82f6, var(--accent));
+    height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent), var(--accent));
     background-size: 200% 100%;
     border-radius: 2px;
     transition: width 0.4s ease;
@@ -1030,14 +1036,14 @@
     border-radius: var(--radius-sm); transition: var(--transition);
   }
   .post-action:hover { background: var(--bg-hover); color: var(--text-secondary); }
-  .post-action.liked { color: #e74c3c; }
+  .post-action.liked { color: var(--liked); }
   .post-action .action-icon { font-size: 15px; }
   .post-del-btn {
     margin-left: auto; padding: 4px 8px; border: none; background: transparent;
     color: var(--text-tertiary); cursor: pointer; border-radius: 4px;
     font-size: 14px; transition: all 0.15s ease; flex-shrink: 0;
   }
-  .post-del-btn:hover { color: #dc2626; background: #fef2f2; }
+  .post-del-btn:hover { color: var(--destructive); background: var(--destructive-light); }
 
   /* Comment area */
   .comment-area {
@@ -1141,7 +1147,7 @@
     flex-shrink: 0;
   }
   .wc-tag .wc-del:hover {
-    opacity: 1; background: rgba(220,38,38,0.15); color: #dc2626;
+    opacity: 1; background: rgba(220,38,38,0.15); color: var(--destructive);
   }
   .wc-tag:hover {
     transform: scale(1.12); z-index: 5;
@@ -1196,7 +1202,7 @@
     background: none; border: none; font-family: inherit; padding: 2px 6px;
     border-radius: 4px; transition: var(--transition);
   }
-  .wc-clear-btn:hover { color: #dc2626; background: #fef2f2; }
+  .wc-clear-btn:hover { color: var(--destructive); background: var(--destructive-light); }
 
   /* ── Responsive ── */
   @media (max-width: 768px) {
@@ -1260,7 +1266,7 @@
   }
   .auth-btn.primary { background: var(--accent); color: #fff; }
   .auth-btn.primary:hover { background: var(--accent-hover); }
-  .auth-error { color: #dc2626; font-size: 13px; text-align: center; margin-top: 10px; min-height: 18px; }
+  .auth-error { color: var(--destructive); font-size: 13px; text-align: center; margin-top: 10px; min-height: 18px; }
   .auth-close {
     position: absolute; top: 12px; right: 12px;
     width: 28px; height: 28px; border-radius: 50%;
@@ -1287,7 +1293,7 @@
     font-size: 12px; color: var(--text-tertiary); cursor: pointer;
     padding: 2px 6px; border-radius: 4px; border: none; background: transparent;
   }
-  .nav-logout:hover { color: #dc2626; background: #fef2f2; }
+  .nav-logout:hover { color: var(--destructive); background: var(--destructive-light); }
 
   /* ── Workshop View ── */
   .workshop-view {
@@ -1474,6 +1480,14 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
   .btn-accent { background: var(--accent); color: #fff; }
   .btn-accent:hover { background: var(--accent-hover); }
   .btn-accent::after { content: none; }
@@ -1634,7 +1648,7 @@
     color: var(--text-secondary); font-family: inherit; transition: var(--transition);
   }
   .group-card-header .group-actions button:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
-  .group-card-header .group-actions button.danger:hover { background: #e74c3c; border-color: #e74c3c; }
+  .group-card-header .group-actions button.danger:hover { background: var(--liked); border-color: var(--liked); }
   .group-members { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
   .group-member-tag {
     display: inline-flex; align-items: center; gap: 4px;
@@ -1645,7 +1659,7 @@
     cursor: pointer; font-size: 14px; color: var(--text-tertiary);
     line-height: 1; transition: var(--transition);
   }
-  .group-member-tag .remove-member:hover { color: #e74c3c; }
+  .group-member-tag .remove-member:hover { color: var(--liked); }
   .group-add-member { margin-top: 10px; display: flex; gap: 8px; }
   .group-add-member select {
     flex: 1; padding: 6px 10px; border: 1px solid var(--border);
@@ -2869,8 +2883,9 @@ function nextLesson() {
   completedLessons[curCourse.id].add(curChapIdx);
   saveProgressToLocal();
   syncProgress();
-  if (curChapIdx < curCourse.chaps.length - 1) { curChapIdx++; updateLearnUI(); }
-  if (curChapIdx === curCourse.chaps.length - 1 && completedLessons[curCourse.id].size >= curCourse.chaps.length) {
+  if (curChapIdx < curCourse.chaps.length - 1) {
+    curChapIdx++;
+  } else if (completedLessons[curCourse.id].size >= curCourse.chaps.length) {
     showToast('已完成全部课时');
   }
   updateLearnUI();
@@ -2899,7 +2914,16 @@ function restoreEnrollmentFromLocal() {
   } catch {}
 }
 
-function prevLesson() { if (curChapIdx > 0) { curChapIdx--; updateLearnUI(); } }
+function prevLesson() {
+  if (curChapIdx > 0) {
+    if (!completedLessons[curCourse.id]) completedLessons[curCourse.id] = new Set();
+    completedLessons[curCourse.id].add(curChapIdx);
+    saveProgressToLocal();
+    syncProgress();
+    curChapIdx--;
+    updateLearnUI();
+  }
+}
 
 function closeLearn() {
   document.getElementById('learnView').classList.remove('open');
@@ -3180,11 +3204,7 @@ document.getElementById('postInput').addEventListener('input', function() {
   hint.classList.toggle('warn', len > 1800);
 });
 
-function escHtml(s) {
-  const div = document.createElement('div');
-  div.textContent = s || '';
-  return div.innerHTML;
-}
+// escHtml 是 escapeHtml 的别名（定义在文件末尾）
 
 function fmtTime(iso) {
   if (!iso) return '';
@@ -4175,7 +4195,7 @@ var studioSysTags = [
   { id:'decide', label:'🧠 决策系统', color:'#ea5a0c', desc:'推理速度/控制频率/延迟<50ms' },
   { id:'motion', label:'⚡ 运动执行', color:'#0d9488', desc:'关节力矩/步频/步幅/落足精度' },
   { id:'energy', label:'🔋 能源系统', color:'#7c3aed', desc:'电池容量/能量密度/续航≥25km' },
-  { id:'cooling', label:'❄️ 散热系统', color:'#dc2626', desc:'散热功率/冷却方式/温升<30℃' }
+  { id:'cooling', label:'❄️ 散热系统', color: 'var(--destructive)', desc:'散热功率/冷却方式/温升<30℃' }
 ];
 
 function openDesignStudio() {
@@ -4404,6 +4424,7 @@ function escapeHtml(str) {
   div.textContent = str;
   return div.innerHTML;
 }
+const escHtml = escapeHtml;
 
 // Render is called in the async init block above
 </script>
