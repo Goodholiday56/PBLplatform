@@ -3,15 +3,16 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const zlib = require('zlib');
 
 const PORT = 8000;
 const HOST = '0.0.0.0';
 const DATA_DIR = path.join(__dirname, 'data');
 
-// ── 智谱清言 GLM-4-Flash 配置 ──
-const ZHIPU_API_KEY = '0d5cb168be174138b52332b2283e5239.21Sbfcv5RQSmI1VD';
-const ZHIPU_API_URL = 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
-const ZHIPU_MODEL = 'glm-4-flash';
+// ── DeepSeek 配置 ──
+const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY ;
+const DEEPSEEK_API_URL = 'https://api.deepseek.com/chat/completions';
+const DEEPSEEK_MODEL = 'deepseek-chat';
 
 const SYSTEM_PROMPT = `你是"人机共跑"跨学科PBL教学平台的AI学习助手。平台以2026北京亦庄人形机器人半程马拉松为真实情境，服务初三升高一学生，整合地理、物理、信息技术、语文等多学科。
 
@@ -64,14 +65,28 @@ const MIME = {
   '.woff2': 'font/woff2',
   '.md': 'text/markdown; charset=utf-8',
   '.txt': 'text/plain; charset=utf-8',
+  '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  '.pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
 };
 
-// ── File-based JSON store ──
+// ── In-memory JSON store (write-through cache) ──
+const _jsonCache = new Map();
+const _jsonMtime = new Map();
+
 function readJSON(filename) {
   const filepath = path.join(DATA_DIR, filename);
   try {
-    if (!fs.existsSync(filepath)) return null;
-    return JSON.parse(fs.readFileSync(filepath, 'utf-8'));
+    const stat = fs.statSync(filepath);
+    const cached = _jsonMtime.get(filename);
+    if (cached === stat.mtimeMs && _jsonCache.has(filename)) {
+      return _jsonCache.get(filename);
+    }
+    const raw = fs.readFileSync(filepath, 'utf-8');
+    const data = JSON.parse(raw);
+    _jsonCache.set(filename, data);
+    _jsonMtime.set(filename, stat.mtimeMs);
+    return data;
   } catch {
     return null;
   }
@@ -79,7 +94,12 @@ function readJSON(filename) {
 
 function writeJSON(filename, data) {
   const filepath = path.join(DATA_DIR, filename);
-  fs.writeFileSync(filepath, JSON.stringify(data, null, 2), 'utf-8');
+  _jsonCache.set(filename, data);
+  fs.writeFile(filepath, JSON.stringify(data, null, 2), 'utf-8', (err) => {
+    if (!err) {
+      try { _jsonMtime.set(filename, fs.statSync(filepath).mtimeMs); } catch {}
+    }
+  });
 }
 
 // ── 用户认证 ──
@@ -89,6 +109,8 @@ const POSTS_FILE = 'posts.json';
 const COMMENTS_FILE = 'comments.json';
 const WORKS_FILE = 'works.json';
 const REVIEWS_FILE = 'reviews.json';
+const WORDCLOUD_FILE = 'wordcloud.json';
+const GROUPS_FILE = 'groups.json';
 
 const ANALYSIS_SYSTEM_PROMPT = `你是"人机共跑"教学平台的AI学情分析助手。根据教师提供的班级数据，生成教学洞察。
 
@@ -142,11 +164,28 @@ function authUser(req) {
   return validateToken(token);
 }
 
-// ── 智谱 API 调用 ──
-function callZhipuAPI(messages) {
+// ── 小组辅助函数 ──
+function getUserGroup(userId) {
+  const groups = readJSON(GROUPS_FILE) || [];
+  return groups.find(g => g.members && g.members.includes(userId)) || null;
+}
+
+function getGroupById(groupId) {
+  const groups = readJSON(GROUPS_FILE) || [];
+  return groups.find(g => g.id === groupId) || null;
+}
+
+function getWordCloudKey(lessonKey, groupId, userId) {
+  // 有小组：按小组共享；无小组：按个人
+  if (groupId) return lessonKey + '_group_' + groupId;
+  return lessonKey + '_user_' + userId;
+}
+
+// ── DeepSeek API 调用 ──
+function callDeepSeekAPI(messages) {
   return new Promise((resolve, reject) => {
     const postData = JSON.stringify({
-      model: ZHIPU_MODEL,
+      model: DEEPSEEK_MODEL,
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         ...messages
@@ -155,7 +194,7 @@ function callZhipuAPI(messages) {
       max_tokens: 800,
     });
 
-    const url = new URL(ZHIPU_API_URL);
+    const url = new URL(DEEPSEEK_API_URL);
     const options = {
       hostname: url.hostname,
       port: 443,
@@ -163,7 +202,7 @@ function callZhipuAPI(messages) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${ZHIPU_API_KEY}`,
+        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
         'Content-Length': Buffer.byteLength(postData),
       },
       timeout: 15000,
@@ -200,7 +239,7 @@ function callCompareAPI(messages, systemPrompt) {
   const sp = systemPrompt || COMPARE_SYSTEM_PROMPT;
   return new Promise((resolve, reject) => {
     const postData = JSON.stringify({
-      model: ZHIPU_MODEL,
+      model: DEEPSEEK_MODEL,
       messages: [
         { role: 'system', content: sp },
         ...messages
@@ -209,7 +248,7 @@ function callCompareAPI(messages, systemPrompt) {
       max_tokens: systemPrompt ? 1000 : 1500,
     });
 
-    const url = new URL(ZHIPU_API_URL);
+    const url = new URL(DEEPSEEK_API_URL);
     const options = {
       hostname: url.hostname,
       port: 443,
@@ -217,7 +256,7 @@ function callCompareAPI(messages, systemPrompt) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${ZHIPU_API_KEY}`,
+        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
         'Content-Length': Buffer.byteLength(postData),
       },
       timeout: 30000,
@@ -366,14 +405,23 @@ async function handleAPI(req, res) {
     return;
   }
 
-  // GET /api/me — 获取当前用户
+  // GET /api/me — 获取当前用户（含小组信息）
   if (route === '/api/me' && req.method === 'GET') {
     const user = authUser(req);
     if (!user) {
       sendJSON(res, 401, { error: '未登录或登录已过期' });
       return;
     }
-    sendJSON(res, 200, { user: { id: user.id, username: user.username, role: user.role } });
+    const group = getUserGroup(user.id);
+    sendJSON(res, 200, {
+      user: {
+        id: user.id,
+        username: user.username,
+        role: user.role,
+        groupId: group ? group.id : null,
+        groupName: group ? group.name : null,
+      }
+    });
     return;
   }
 
@@ -394,11 +442,11 @@ async function handleAPI(req, res) {
     ];
 
     try {
-      const reply = await callZhipuAPI(messages);
-      sendJSON(res, 200, { reply, timestamp: new Date().toISOString(), source: 'zhipu' });
-      console.log(`[AI] 用户提问: ${userMsg.substring(0, 50)}... → 智谱回复 (${reply.length}字)`);
+      const reply = await callDeepSeekAPI(messages);
+      sendJSON(res, 200, { reply, timestamp: new Date().toISOString(), source: 'deepseek' });
+      console.log(`[AI] 用户提问: ${userMsg.substring(0, 50)}... → DeepSeek回复 (${reply.length}字)`);
     } catch (err) {
-      console.log(`[AI] 智谱API调用失败: ${err.message}，使用本地回复`);
+      console.log(`[AI] DeepSeek API调用失败: ${err.message}，使用本地回复`);
       const fallbackReply = getFallbackResponse(userMsg);
       sendJSON(res, 200, {
         reply: fallbackReply,
@@ -475,6 +523,94 @@ async function handleAPI(req, res) {
     return;
   }
 
+  // POST /api/upload — file upload for homework (需登录, multipart)
+  if (route === '/api/upload' && req.method === 'POST') {
+    const user = authUser(req);
+    if (!user) { sendJSON(res, 401, { error: '请先登录' }); return; }
+
+    const contentType = req.headers['content-type'] || '';
+    if (!contentType.includes('multipart/form-data')) {
+      sendJSON(res, 400, { error: '需要 multipart/form-data' });
+      return;
+    }
+
+    const boundary = '--' + contentType.split('boundary=')[1];
+    const chunks = [];
+    req.on('data', chunk => chunks.push(chunk));
+    req.on('end', () => {
+      const buffer = Buffer.concat(chunks);
+      const body = buffer.toString('binary');
+      const parts = body.split(boundary).slice(1, -1);
+
+      let fileData = null, fileName = '', courseId = '', lessonIdx = '';
+
+      for (const part of parts) {
+        const headerEnd = part.indexOf('\r\n\r\n');
+        const header = part.slice(0, headerEnd);
+        const content = part.slice(headerEnd + 4, part.endsWith('\r\n') ? part.length - 2 : part.length);
+
+        if (header.includes('filename=')) {
+          const nameMatch = header.match(/filename="(.+?)"/);
+          if (nameMatch) fileName = nameMatch[1];
+          fileData = Buffer.from(content, 'binary');
+        } else if (header.includes('name="courseId"')) {
+          courseId = content.trim();
+        } else if (header.includes('name="lessonIdx"')) {
+          lessonIdx = content.trim();
+        }
+      }
+
+      if (!fileData || !fileName) {
+        sendJSON(res, 400, { error: '未找到上传文件' });
+        return;
+      }
+
+      const uploadDir = path.join(DATA_DIR, 'uploads');
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+
+      const safeName = Date.now() + '_' + fileName.replace(/[^a-zA-Z0-9._\-一-鿿]/g, '_');
+      const filePath = path.join(uploadDir, safeName);
+      fs.writeFileSync(filePath, fileData);
+
+      // Save record
+      const all = readJSON('homework.json') || [];
+      all.push({
+        userId: user.id,
+        courseId,
+        lessonIdx,
+        type: 'file',
+        fileName,
+        storedName: safeName,
+        size: fileData.length,
+        id: Date.now(),
+        submittedAt: new Date().toISOString()
+      });
+      writeJSON('homework.json', all);
+
+      sendJSON(res, 200, { ok: true, fileName, storedName: safeName });
+    });
+    return;
+  }
+
+  // GET /api/uploads/:name — serve uploaded files
+  if (route.startsWith('/api/uploads/') && req.method === 'GET') {
+    const fileName = route.replace('/api/uploads/', '');
+    const safeName = fileName.replace(/[^a-zA-Z0-9._\-]/g, '');
+    const filePath = path.join(DATA_DIR, 'uploads', safeName);
+    if (!fs.existsSync(filePath)) {
+      sendJSON(res, 404, { error: '文件未找到' });
+      return;
+    }
+    const ext = path.extname(filePath);
+    const contentType = MIME[ext] || 'application/octet-stream';
+    const data = fs.readFileSync(filePath);
+    res.writeHead(200, { 'Content-Type': contentType, 'Content-Length': data.length });
+    res.end(data);
+    return;
+  }
+
   // GET /api/status — health check with LAN info
   if (route === '/api/status' && req.method === 'GET') {
     const os = require('os');
@@ -491,7 +627,7 @@ async function handleAPI(req, res) {
       status: 'running',
       port: PORT,
       lanIPs: ips,
-      aiModel: ZHIPU_MODEL,
+      aiModel: DEEPSEEK_MODEL,
       uptime: process.uptime(),
     });
     return;
@@ -544,6 +680,30 @@ async function handleAPI(req, res) {
     writeJSON(POSTS_FILE, all);
     sendJSON(res, 201, { ...post, commentCount: 0 });
     console.log(`[帖子] ${user.username} 在 ${lessonKey} 发了新帖`);
+    return;
+  }
+
+  // DELETE /api/posts/:id — 删除帖子（需登录，仅作者或教师可删）
+  if (req.method === 'DELETE' && route.match(/^\/api\/posts\/(\d+)$/)) {
+    const user = authUser(req);
+    if (!user) { sendJSON(res, 401, { error: '请先登录' }); return; }
+    const postId = parseInt(route.match(/^\/api\/posts\/(\d+)$/)[1], 10);
+    if (!postId) { sendJSON(res, 400, { error: '无效的帖子ID' }); return; }
+    const all = readJSON(POSTS_FILE) || [];
+    const idx = all.findIndex(p => p.id === postId);
+    if (idx < 0) { sendJSON(res, 404, { error: '帖子不存在' }); return; }
+    if (all[idx].userId !== user.id && user.role !== 'teacher') {
+      sendJSON(res, 403, { error: '仅作者或教师可删除' });
+      return;
+    }
+    all.splice(idx, 1);
+    writeJSON(POSTS_FILE, all);
+    // 同步删除该帖子的所有评论
+    const comments = readJSON(COMMENTS_FILE) || [];
+    const filtered = comments.filter(c => c.postId !== postId);
+    if (filtered.length !== comments.length) writeJSON(COMMENTS_FILE, filtered);
+    console.log(`[帖子] ${user.username} 删除了帖子 ${postId}`);
+    sendJSON(res, 200, { ok: true });
     return;
   }
 
@@ -619,7 +779,8 @@ async function handleAPI(req, res) {
   // GET /api/publish-state?lessonKey=1_0 — 获取发布状态（公开）
   if (route === '/api/publish-state' && req.method === 'GET') {
     const lessonKey = url.searchParams.get('lessonKey') || '';
-    const all = readJSON('publish_state.json') || {};
+    let all = readJSON('publish_state.json') || {};
+    if (Array.isArray(all)) all = {}; // 修复旧数据可能为数组的问题
     const user = authUser(req);
     sendJSON(res, 200, {
       published: all[lessonKey] || [],
@@ -637,7 +798,8 @@ async function handleAPI(req, res) {
     const lessonKey = (body.lessonKey || '').trim();
     const idx = parseInt(body.activityIndex, 10);
     if (!lessonKey || isNaN(idx)) { sendJSON(res, 400, { error: '参数错误' }); return; }
-    const all = readJSON('publish_state.json') || {};
+    let all = readJSON('publish_state.json') || {};
+    if (Array.isArray(all)) all = {};
     if (!all[lessonKey]) all[lessonKey] = [];
     if (!all[lessonKey].includes(idx)) all[lessonKey].push(idx);
     writeJSON('publish_state.json', all);
@@ -655,7 +817,8 @@ async function handleAPI(req, res) {
     const lessonKey = (body.lessonKey || '').trim();
     const idx = parseInt(body.activityIndex, 10);
     if (!lessonKey || isNaN(idx)) { sendJSON(res, 400, { error: '参数错误' }); return; }
-    const all = readJSON('publish_state.json') || {};
+    let all = readJSON('publish_state.json') || {};
+    if (Array.isArray(all)) all = {};
     if (all[lessonKey]) all[lessonKey] = all[lessonKey].filter(i => i !== idx);
     writeJSON('publish_state.json', all);
     sendJSON(res, 200, { ok: true, published: all[lessonKey] || [] });
@@ -919,18 +1082,211 @@ async function handleAPI(req, res) {
     return;
   }
 
+  // ── 词云（小组协作共享）API ──
+
+  // GET /api/wordcloud?lessonKey=1_2 — 获取词云数据（按小组）
+  if (route === '/api/wordcloud' && req.method === 'GET') {
+    const user = authUser(req);
+    if (!user) { sendJSON(res, 401, { error: '请先登录' }); return; }
+    const lessonKey = (url.searchParams.get('lessonKey') || '').trim();
+    if (!lessonKey) { sendJSON(res, 400, { error: '缺少课程参数' }); return; }
+    const group = getUserGroup(user.id);
+    const cloudKey = getWordCloudKey(lessonKey, group ? group.id : null, user.id);
+    const all = readJSON(WORDCLOUD_FILE) || {};
+    const data = all[cloudKey] || { keywords: [] };
+
+    sendJSON(res, 200, {
+      keywords: data.keywords || [],
+      groupId: group ? group.id : null,
+      groupName: group ? group.name : null,
+      contributors: data.contributors || (data.keywords && data.keywords.length ? [user.username] : []),
+    });
+    return;
+  }
+
+  // POST /api/wordcloud — 保存词云数据（按小组共享）
+  if (route === '/api/wordcloud' && req.method === 'POST') {
+    const user = authUser(req);
+    if (!user) { sendJSON(res, 401, { error: '请先登录' }); return; }
+    const body = await parseBody(req);
+    const lessonKey = (body.lessonKey || '').trim();
+    const keywords = body.keywords || [];
+    if (!lessonKey) { sendJSON(res, 400, { error: '缺少课程参数' }); return; }
+
+    const group = getUserGroup(user.id);
+    const cloudKey = getWordCloudKey(lessonKey, group ? group.id : null, user.id);
+    const all = readJSON(WORDCLOUD_FILE) || {};
+
+    // 合并贡献者列表
+    const existing = all[cloudKey] || { keywords: [], contributors: [] };
+    const contributors = existing.contributors || [];
+    if (!contributors.includes(user.username)) {
+      contributors.push(user.username);
+    }
+
+    all[cloudKey] = {
+      keywords: keywords,
+      groupId: group ? group.id : null,
+      groupName: group ? group.name : null,
+      contributors: contributors,
+      updatedAt: new Date().toISOString(),
+    };
+    writeJSON(WORDCLOUD_FILE, all);
+    sendJSON(res, 200, { ok: true, groupId: group ? group.id : null });
+    console.log(`[词云] ${user.username} 更新了 ${lessonKey} 的词云 (${group ? group.name : '个人模式'})`);
+    return;
+  }
+
+  // ── 小组管理 API（教师专用） ──
+
+  // GET /api/groups — 获取所有小组（教师）或当前用户小组（学生）
+  if (route === '/api/groups' && req.method === 'GET') {
+    const user = authUser(req);
+    if (!user) { sendJSON(res, 401, { error: '请先登录' }); return; }
+
+    if (user.role === 'teacher') {
+      const groups = readJSON(GROUPS_FILE) || [];
+      // 补充每个小组成员的用户名
+      const users = readJSON(USERS_FILE) || [];
+      const enriched = groups.map(g => ({
+        ...g,
+        memberDetails: (g.members || []).map(mid => {
+          const u = users.find(u => u.id === mid);
+          return u ? { id: u.id, username: u.username } : { id: mid, username: '未知' };
+        })
+      }));
+      sendJSON(res, 200, enriched);
+    } else {
+      const group = getUserGroup(user.id);
+      sendJSON(res, 200, group ? [group] : []);
+    }
+    return;
+  }
+
+  // POST /api/groups — 创建小组（教师）
+  if (route === '/api/groups' && req.method === 'POST') {
+    const user = authUser(req);
+    if (!user || user.role !== 'teacher') { sendJSON(res, 403, { error: '仅教师可操作' }); return; }
+    const body = await parseBody(req);
+    const name = (body.name || '').trim();
+    if (!name) { sendJSON(res, 400, { error: '小组名称不能为空' }); return; }
+    const groups = readJSON(GROUPS_FILE) || [];
+    const maxId = groups.reduce((max, g) => Math.max(max, g.id || 0), 0);
+    const newGroup = {
+      id: maxId + 1,
+      name: name,
+      members: [],
+      createdAt: new Date().toISOString(),
+    };
+    groups.push(newGroup);
+    writeJSON(GROUPS_FILE, groups);
+    sendJSON(res, 201, newGroup);
+    console.log(`[小组] 教师 ${user.username} 创建了小组: ${name}`);
+    return;
+  }
+
+  // PUT /api/groups/:id — 更新小组名称（教师）
+  if (route.match(/^\/api\/groups\/\d+$/) && req.method === 'PUT') {
+    const user = authUser(req);
+    if (!user || user.role !== 'teacher') { sendJSON(res, 403, { error: '仅教师可操作' }); return; }
+    const groupId = parseInt(route.split('/')[3], 10);
+    const body = await parseBody(req);
+    const name = (body.name || '').trim();
+    if (!name) { sendJSON(res, 400, { error: '小组名称不能为空' }); return; }
+    const groups = readJSON(GROUPS_FILE) || [];
+    const idx = groups.findIndex(g => g.id === groupId);
+    if (idx < 0) { sendJSON(res, 404, { error: '小组不存在' }); return; }
+    groups[idx].name = name;
+    writeJSON(GROUPS_FILE, groups);
+    sendJSON(res, 200, groups[idx]);
+    console.log(`[小组] 教师 ${user.username} 更新了小组名称: ${name}`);
+    return;
+  }
+
+  // DELETE /api/groups/:id — 删除小组（教师）
+  if (route.match(/^\/api\/groups\/\d+$/) && req.method === 'DELETE') {
+    const user = authUser(req);
+    if (!user || user.role !== 'teacher') { sendJSON(res, 403, { error: '仅教师可操作' }); return; }
+    const groupId = parseInt(route.split('/')[3], 10);
+    const groups = readJSON(GROUPS_FILE) || [];
+    const filtered = groups.filter(g => g.id !== groupId);
+    if (filtered.length === groups.length) { sendJSON(res, 404, { error: '小组不存在' }); return; }
+    writeJSON(GROUPS_FILE, filtered);
+    sendJSON(res, 200, { ok: true });
+    console.log(`[小组] 教师 ${user.username} 删除了小组 ${groupId}`);
+    return;
+  }
+
+  // POST /api/groups/:id/members — 添加成员到小组（教师）
+  if (route.match(/^\/api\/groups\/\d+\/members$/) && req.method === 'POST') {
+    const user = authUser(req);
+    if (!user || user.role !== 'teacher') { sendJSON(res, 403, { error: '仅教师可操作' }); return; }
+    const groupId = parseInt(route.split('/')[3], 10);
+    const body = await parseBody(req);
+    const memberId = (body.userId || '').trim();
+    if (!memberId) { sendJSON(res, 400, { error: '缺少用户ID' }); return; }
+    const groups = readJSON(GROUPS_FILE) || [];
+    const group = groups.find(g => g.id === groupId);
+    if (!group) { sendJSON(res, 404, { error: '小组不存在' }); return; }
+    if (!group.members) group.members = [];
+
+    // 从其他小组中移除该学生
+    for (const g of groups) {
+      if (g.id !== groupId && g.members) {
+        g.members = g.members.filter(m => m !== memberId);
+      }
+    }
+
+    if (!group.members.includes(memberId)) {
+      group.members.push(memberId);
+    }
+    writeJSON(GROUPS_FILE, groups);
+
+    const users = readJSON(USERS_FILE) || [];
+    const memberUser = users.find(u => u.id === memberId);
+    sendJSON(res, 200, { ok: true, group });
+    console.log(`[小组] 教师 ${user.username} 将 ${memberUser ? memberUser.username : memberId} 加入 ${group.name}`);
+    return;
+  }
+
+  // DELETE /api/groups/:id/members/:userId — 移除成员（教师）
+  if (route.match(/^\/api\/groups\/\d+\/members\/[\w-]+$/) && req.method === 'DELETE') {
+    const user = authUser(req);
+    if (!user || user.role !== 'teacher') { sendJSON(res, 403, { error: '仅教师可操作' }); return; }
+    const parts = route.split('/');
+    const groupId = parseInt(parts[3], 10);
+    const memberId = parts[5];
+    const groups = readJSON(GROUPS_FILE) || [];
+    const group = groups.find(g => g.id === groupId);
+    if (!group) { sendJSON(res, 404, { error: '小组不存在' }); return; }
+    if (group.members) {
+      group.members = group.members.filter(m => m !== memberId);
+    }
+    writeJSON(GROUPS_FILE, groups);
+
+    const users = readJSON(USERS_FILE) || [];
+    const memberUser = users.find(u => u.id === memberId);
+    sendJSON(res, 200, { ok: true, group });
+    console.log(`[小组] 教师 ${user.username} 将 ${memberUser ? memberUser.username : memberId} 移出 ${group.name}`);
+    return;
+  }
+
   // 404 for unknown API routes
   sendJSON(res, 404, { error: 'API route not found' });
 }
 
-// ── Static file server ──
+// ── Static file server (gzip + ETag) ──
+const COMPRESSIBLE = new Set([
+  '.html', '.css', '.js', '.json', '.svg', '.xml', '.txt', '.md', '.csv'
+]);
+
 const server = http.createServer((req, res) => {
   if (req.url.startsWith('/api/')) {
     handleAPI(req, res);
     return;
   }
 
-  let filePath = req.url === '/' ? '/index.html' : req.url.split('?')[0];
+  let filePath = req.url === '/' ? '/index.html' : decodeURIComponent(req.url.split('?')[0]);
   filePath = path.join(__dirname, filePath);
 
   // Prevent directory traversal
@@ -942,29 +1298,67 @@ const server = http.createServer((req, res) => {
   }
 
   // If path is a directory, try index.html
-  if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
-    filePath = path.join(filePath, 'index.html');
+  try {
+    if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
+      filePath = path.join(filePath, 'index.html');
+    }
+  } catch { filePath = null; }
+
+  if (!filePath) {
+    res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end('<h1>404</h1>');
+    return;
   }
 
   const ext = path.extname(filePath);
   const contentType = MIME[ext] || 'application/octet-stream';
+  const compressible = COMPRESSIBLE.has(ext);
 
-  fs.readFile(filePath, (err, data) => {
+  fs.stat(filePath, (err, stat) => {
     if (err) {
-      if (err.code === 'ENOENT') {
-        res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
-        res.end(`<h1>404</h1><p>页面未找到: ${req.url}</p>`);
-      } else {
-        res.writeHead(500);
-        res.end('Internal Server Error');
-      }
+      res.writeHead(err.code === 'ENOENT' ? 404 : 500, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end(err.code === 'ENOENT' ? `<h1>404</h1><p>${req.url}</p>` : 'Internal Server Error');
       return;
     }
+
+    // ETag: mtime + size
+    const etag = `"${stat.mtimeMs.toString(36)}-${stat.size.toString(36)}"`;
+    const ifNoneMatch = req.headers['if-none-match'];
+    if (ifNoneMatch === etag) {
+      res.writeHead(304, { 'ETag': etag });
+      res.end();
+      return;
+    }
+
+    // Gzip check
+    const acceptEncoding = req.headers['accept-encoding'] || '';
+    const doGzip = compressible && acceptEncoding.includes('gzip') && stat.size > 512;
+
+    if (!doGzip) {
+      fs.readFile(filePath, (readErr, data) => {
+        if (readErr) { res.writeHead(500); res.end(); return; }
+        res.writeHead(200, {
+          'Content-Type': contentType,
+          'Content-Length': data.length,
+          'ETag': etag,
+          'Cache-Control': 'public, max-age=300',
+        });
+        res.end(data);
+      });
+      return;
+    }
+
+    // Gzip on-the-fly
+    const raw = fs.createReadStream(filePath);
+    const gzip = zlib.createGzip({ level: 6 });
     res.writeHead(200, {
       'Content-Type': contentType,
-      'Cache-Control': 'no-cache',
+      'Content-Encoding': 'gzip',
+      'ETag': etag,
+      'Cache-Control': 'public, max-age=300',
+      'Vary': 'Accept-Encoding',
     });
-    res.end(data);
+    raw.pipe(gzip).pipe(res);
   });
 });
 
@@ -977,7 +1371,7 @@ server.listen(PORT, HOST, () => {
   console.log('  ═══════════════════════════════════════════');
   console.log('');
   console.log(`  ✅ 服务已启动:  http://localhost:${PORT}`);
-  console.log(`  🤖 AI模型:     智谱清言 ${ZHIPU_MODEL}`);
+  console.log(`  🤖 AI模型:     DeepSeek ${DEEPSEEK_MODEL}`);
   console.log('');
   console.log('  📱 局域网访问地址:');
   for (const name of Object.keys(ifaces)) {

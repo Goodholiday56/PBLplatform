@@ -42,6 +42,11 @@ const lessonMaterials = {
     },
     homework:'1. 绘制亦庄赛事选址简易分析图（手绘或电子版均可），配100字文字说明，分析为什么亦庄而非市中心。\n2. 查阅《北京城市总体规划（2016年-2035年）》，摘录亦庄新城的3个核心定位信息。',
     mapFocus: { name:'北京亦庄经开区', lat:39.795, lng:116.505, desc:'北京经济技术开发区，位于东南五环外，1994年获批国家级经开区' },
+    activityResources: {
+      0: ['平台教学资源/子问题一/课时一/活动一_定位亦庄/亦庄卫星影像图.md', '平台教学资源/子问题一/课时一/活动一_定位亦庄/北京市行政区划图.jpg', '平台教学资源/子问题一/课时一/活动一_定位亦庄/地铁线路图.jpg'],
+      1: ['平台教学资源/子问题一/课时一/活动二_赛道解码/南海子公园.jpg', '平台教学资源/子问题一/课时一/活动二_赛道解码/路线图.png'],
+    },
+    materialGate: { map: 0, keyData: 0, compareTable: 1, homework: 2 },
   },
 
   '1_1': { // 课时2：产业寻链 — 解读亦庄的科技生态
@@ -70,6 +75,11 @@ const lessonMaterials = {
       { name:'小米机器人', product:'CyberOne', tech:'自研Mi-Sense感知+全身控制', role:'整机制造', event:'技术展示，推动行业关注' },
     ],
     homework:'1. 结合具体企业案例，撰写100字亦庄赛事产业选址分析。\n2. 调研一家亦庄机器人企业的核心技术故事与研发历程。',
+    activityResources: {
+      0: ['平台教学资源/子问题一/课时二/活动一_机器人地图/企业信息.md'],
+      1: ['平台教学资源/子问题一/课时二/活动二_产业与赛事/产业支撑四维度分析表.xlsx', '平台教学资源/子问题一/课时二/活动二_产业与赛事/工作人员维修.jpg'],
+    },
+    materialGate: { chainFramework: 0, companies: 0, homework: 1 },
   },
 
   '1_2': { // 课时3：政策解析 — 理解赛事的社会价值
@@ -96,7 +106,18 @@ const lessonMaterials = {
         ['公众认知','"参数很好但离我很远"','"机器人真的在跑！技术进步看得见"'],
       ]
     },
+    wordCloud: {
+      title: '政策关键词云',
+      desc: '小组协作共建：研读政策文件后，在下方输入框中添加你发现的关键词。同一小组的所有成员共享词云进度，重复添加的关键词会自动增大显示。思考：这些高频词如何串联成赛事落地的政策支撑逻辑？',
+      keywords: [],  // 初始为空，由各小组协作构建
+      colors: ['#1a56db','#6d28d9','#0d9488','#ea5a0c','#2563eb','#7c3aed','#059669','#d97706'],
+    },
+    activityResources: {
+      0: ['平台教学资源/子问题一/课时三/新一代人工智能发展规划政策摘要卡.pdf'],
+      1: ['平台教学资源/子问题一/课时三/机器人马拉松社会价值分析表.xlsx'],
+    },
     homework:'1. 整合地理空间、产业集群、国家政策三个维度的全部探究成果，完成《为什么是亦庄》综合分析报告（500-800字）。\n2. 调研一个同类"科技+体育"跨界赛事案例，对比传播策略差异。',
+    materialGate: { policyTimeline: 0, compareMedia: 1, wordCloud: 0, homework: 1 },
   },
 
   // ═══════════════════════════════════════════════
@@ -133,6 +154,12 @@ const lessonMaterials = {
       ]
     },
     homework:'1. 修正课堂《问题记录表》，针对每个问题提出至少一条优化思路。\n2. 阅读"中国科普博览"机器人专题资料，记录3个感兴趣的技术点。',
+    activityResources: {
+      0: ['平台教学资源/子问题二/课时一/活动一_比赛现象观察/学科维度思考框架.xlsx', '平台教学资源/子问题二/课时一/活动一_比赛现象观察/比赛视频.md', '平台教学资源/子问题二/课时一/活动一_比赛现象观察/问题记录表.xlsx'],
+      1: ['平台教学资源/子问题二/课时一/活动二_奔跑系统解析/机器人结构图.png'],
+      2: ['平台教学资源/子问题二/课时一/活动三_人机运动对比/人体-机器人对照表.xlsx'],
+    },
+    materialGate: { systemsDiagram: 1, bionicTable: 2, homework: 2 },
   },
 
   '2_1': { // 课时2：竞速评测 — 评选最佳半马机器人
@@ -166,6 +193,10 @@ const lessonMaterials = {
       ]
     },
     homework:'1. 参考各组评价成果，筛选最优参赛机器人方案，撰写300字评选理由。\n2. 使用五维评分卡为你心目中的"最佳半马机器人"打分（满分25分）。',
+    activityResources: {
+      0: ['平台教学资源/子问题二/课时二/评价框架.xlsx'],
+    },
+    materialGate: { evalFramework: 0, robotCompare: 1, homework: 1 },
   },
 
   '2_2': { // 课时3：未来竞创 — 打造半马冠军机器人
@@ -197,7 +228,12 @@ const lessonMaterials = {
       { name:'弯道赛段', ratio:'~15%', desc:'12左转+10右转，含近90度锐角弯', challenge:'离心力补偿，需提前降速+身体内倾+步宽调整' },
       { name:'特殊路面', ratio:'~5%', desc:'石板路、窄路、不平整接缝', challenge:'高频振动→姿态估计漂移，考验IMU滤波算法鲁棒性' },
     ],
+    activityResources: {
+      0: ['平台教学资源/子问题二/课时三/活动一/未来半马机器人任务说明卡.png'],
+      1: ['平台教学资源/子问题二/课时三/活动二/小组互评记录表.xlsx'],
+    },
     homework:'1. 结合互评反馈，迭代完善机器人设计方案（设计图+设计说明）。\n2. 撰写200字设计反思：你在"稳定性-续航-竞速"三角中做了怎样的取舍？为什么？',
+    materialGate: { designParams: 1, trackFeatures: 1, homework: 2 },
   },
 
   // ═══════════════════════════════════════════════
@@ -232,6 +268,10 @@ const lessonMaterials = {
       ]
     },
     homework:'1. 补充收集机器人摔倒、减速、续航不足等赛事细节数据（至少5条），标注信息来源。\n2. 使用给定公式为3款不同机器人计算平均速度和配速。',
+    activityResources: {
+      0: ['平台教学资源/子问题三/课时一/活动一_真实情境导入/赛事照片.md'],
+    },
+    materialGate: { analysisFramework: 0, raceDataTable: 1, homework: 1 },
   },
 
   '3_1': { // 课时2：原理分析 — 解释机器人表现差异
@@ -256,6 +296,10 @@ const lessonMaterials = {
       { val:'8%', unit:'max', lbl:'赛道最大坡度' },
     ],
     homework:'1. 完善案例归因分析，每个案例补充至少一个权威资料佐证观点，规范信息来源标注。\n2. 完成《环境研判表》：假设赛事当日气温35℃（极端高温），评估对5种机器人系统的差异化影响。',
+    activityResources: {
+      1: ['平台教学资源/子问题三/课时二/活动二_环境条件判断/赛事组织者决策单.xlsx'],
+    },
+    materialGate: { faultCases: 0, weatherData: 1, homework: 1 },
   },
 
   '3_2': { // 课时3：综合整理 — 形成完赛优化报告
@@ -281,6 +325,11 @@ const lessonMaterials = {
       { name:'B. 竞速冲刺策略', goal:'冲击领奖台，接受DNF可能', speed:'~25 km/h', thermal:'最大化性能输出，承受温升风险，依赖液冷硬抗', corner:'算法优化过弯轨迹，尽可能保持速度', battery:'深度放电到5%，榨取每一Wh能量', risk:'高风险，约60%概率DNF，但若完赛则领先' },
     ],
     homework:'1. 根据反馈迭代优化《机器人参赛综合评估报告》。\n2. 完成个人学习反思（300字）：你在这个模块中学到的最重要的东西是什么？',
+    activityResources: {
+      0: ['平台教学资源/子问题三/课时三/活动一/任务单.png'],
+      1: ['平台教学资源/子问题三/课时三/活动二/机器人参赛综合评估报告.docx'],
+    },
+    materialGate: { tradeoffMatrix: 0, strategies: 0, homework: 1 },
   },
 
   // ═══════════════════════════════════════════════
@@ -320,6 +369,10 @@ const lessonMaterials = {
       ]
     },
     homework:'1. 参考创作支架，拟定个人作品大纲（200字以内），明确创作方向与核心传播主旨。\n2. 阅读至少2篇优秀科普文章，学习通俗化科技表达的技巧。',
+    activityResources: {
+      2: ['平台教学资源/子问题四/课时一/活动三_对比不同报道/报道对比分析表.xlsx'],
+    },
+    materialGate: { newsStructure: 1, mediaCompare: 2, homework: 3 },
   },
 
   '4_1': { // 课时2：创意工坊 — 完成科技传播作品初稿
@@ -345,6 +398,10 @@ const lessonMaterials = {
       { method:'分层法', example:'第一层（一句话）：机器人靠"眼睛看+大脑算+肌肉动"来跑步。第二层（一段话）：解释三大系统如何协同。第三层（详细）：技术原理+数据支撑。', tip:'从"一句话说清楚"到"一段话说完整"到"一篇文章说透彻"，适应不同读者需求。' },
     ],
     homework:'1. 完成科技传播作品初稿（海报/新闻+英文/脚本 三选一）。\n2. 浏览至少2位同学的作品初稿，构思具体的修改建议。\n3. 学习AI内容核查方法：如何验证AI给你的信息是否准确？',
+    activityResources: {
+      1: ['平台教学资源/子问题四/课时二/AI提示词示例卡.png', '平台教学资源/子问题四/课时二/新闻示例和模板.docx', '平台教学资源/子问题四/课时二/海报示例.png', '平台教学资源/子问题四/课时二/短视频脚本示例.xlsx'],
+    },
+    materialGate: { creationTasks: 0, simplifyMethods: 0, homework: 2 },
   },
 
   '4_2': { // 课时3：发布迭代 — 展示并优化科技传播作品
@@ -382,7 +439,11 @@ const lessonMaterials = {
         ['表达效率','需要时间思考、草稿、修改、打磨→慢工出细活','秒级出稿，尤其适合头脑风暴→快速提供多版本参考','AI打草稿，人做编辑'],
       ]
     },
+    activityResources: {
+      1: ['平台教学资源/子问题四/课时三/活动二/小组作品对比分析表.pdf'],
+    },
     homework:'最终提交全套成果：①优化后的传播作品终稿 ②英文简介（如适用）③个人创作日志 ④人机创作对比分析。这四项也是本课程终结性评价的重要依据。',
+    materialGate: { rubric: 0, humanVsAI: 1, homework: 3 },
   },
 };
 
@@ -405,7 +466,12 @@ function getHomeworkHTML(courseId, lessonIdx) {
       </div>
       <div style="display:flex;flex-direction:column;gap:8px;">
         <textarea id="hwText_${courseId}_${lessonIdx}" placeholder="在此编写并提交你的课后任务…" style="width:100%;min-height:100px;border:1px solid var(--border-light);border-radius:var(--radius-sm);padding:12px;font-size:13px;font-family:inherit;resize:vertical;outline:none;line-height:1.6;"></textarea>
-        <div style="display:flex;gap:8px;align-items:center;">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <label id="hwFileLabel_${courseId}_${lessonIdx}" style="display:inline-flex;align-items:center;gap:4px;padding:8px 16px;border-radius:6px;border:1px dashed var(--border);background:var(--bg-card);font-size:12px;cursor:pointer;color:var(--text-secondary);transition:var(--transition);font-family:inherit;">
+            <span>📎 选择文件</span>
+            <input type="file" id="hwFile_${courseId}_${lessonIdx}" style="display:none;" onchange="onHwFileSelected(${courseId},${lessonIdx})" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.txt,.md,.zip">
+          </label>
+          <span id="hwFileName_${courseId}_${lessonIdx}" style="font-size:11px;color:var(--text-tertiary);"></span>
           <button onclick="submitHomework(${courseId},${lessonIdx})" style="padding:8px 20px;border-radius:6px;background:var(--text);color:#fff;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">提交作业</button>
           <span id="hwStatus_${courseId}_${lessonIdx}" style="font-size:12px;color:var(--text-tertiary);"></span>
         </div>
@@ -414,42 +480,102 @@ function getHomeworkHTML(courseId, lessonIdx) {
     </div>`;
 }
 
-// 作业提交处理（本地存储）
+// 文件选择回调
+function onHwFileSelected(courseId, lessonIdx) {
+  const fileInput = document.getElementById('hwFile_' + courseId + '_' + lessonIdx);
+  const nameEl = document.getElementById('hwFileName_' + courseId + '_' + lessonIdx);
+  if (fileInput.files.length > 0) {
+    nameEl.textContent = '已选择: ' + fileInput.files[0].name + ' (' + formatFileSize(fileInput.files[0].size) + ')';
+    nameEl.style.color = 'var(--accent)';
+  } else {
+    nameEl.textContent = '';
+  }
+}
+
+function formatFileSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1048576).toFixed(1) + ' MB';
+}
+
+// 作业提交处理（支持文本+文件）
 const homeworkStore = {};
-function submitHomework(courseId, lessonIdx) {
+async function submitHomework(courseId, lessonIdx) {
   const textarea = document.getElementById('hwText_' + courseId + '_' + lessonIdx);
   const status = document.getElementById('hwStatus_' + courseId + '_' + lessonIdx);
   const submissionsDiv = document.getElementById('hwSubmissions_' + courseId + '_' + lessonIdx);
+  const fileInput = document.getElementById('hwFile_' + courseId + '_' + lessonIdx);
   const content = textarea.value.trim();
-  if (!content) { status.textContent = '请先输入内容再提交'; status.style.color = '#ea5a0c'; return; }
+  const hasFile = fileInput && fileInput.files.length > 0;
+
+  if (!content && !hasFile) { status.textContent = '请先输入内容或选择文件'; status.style.color = '#ea5a0c'; return; }
 
   const key = courseId + '_' + lessonIdx;
   if (!homeworkStore[key]) homeworkStore[key] = [];
-  homeworkStore[key].push({ content, time: new Date().toLocaleString('zh-CN'), id: Date.now() });
 
-  // 同步到服务器
-  try {
-    const headers = { 'Content-Type': 'application/json' };
-    const token = localStorage.getItem('pbl_token');
-    if (token) headers['Authorization'] = 'Bearer ' + token;
-    fetch('/api/homework', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ courseId, lessonIdx, content, time: new Date().toISOString() })
-    }).catch(() => {});
-  } catch {}
+  // 上传文件到服务器
+  let fileInfo = null;
+  if (hasFile && serverAvailable) {
+    status.textContent = '上传中...';
+    status.style.color = 'var(--accent)';
+    const file = fileInput.files[0];
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('courseId', String(courseId));
+    formData.append('lessonIdx', String(lessonIdx));
+
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('pbl_token') || '') },
+        body: formData
+      });
+      if (res.ok) {
+        const data = await res.json();
+        fileInfo = { name: data.fileName, storedName: data.storedName };
+      }
+    } catch (e) {}
+  }
+
+  const entry = {
+    content: content || '(文件提交)',
+    fileName: fileInfo ? fileInfo.name : (hasFile ? fileInput.files[0].name : null),
+    storedName: fileInfo ? fileInfo.storedName : null,
+    time: new Date().toLocaleString('zh-CN'),
+    id: Date.now()
+  };
+  homeworkStore[key].push(entry);
+
+  // 同步文本作业到服务器
+  if (content) {
+    try {
+      const headers = { 'Content-Type': 'application/json' };
+      const token = localStorage.getItem('pbl_token');
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+      fetch('/api/homework', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ courseId, lessonIdx, content, time: new Date().toISOString(), fileName: fileInfo ? fileInfo.name : null })
+      }).catch(() => {});
+    } catch {}
+  }
 
   textarea.value = '';
+  if (fileInput) { fileInput.value = ''; }
+  const fileNameEl = document.getElementById('hwFileName_' + courseId + '_' + lessonIdx);
+  if (fileNameEl) fileNameEl.textContent = '';
   status.textContent = '已提交！';
   status.style.color = '#0d9488';
   setTimeout(() => { status.textContent = ''; }, 2000);
 
   // 显示提交记录
-  submissionsDiv.innerHTML = homeworkStore[key].slice(-5).reverse().map((s, i) =>
-    `<div style="font-size:12px;padding:6px 10px;margin-top:4px;background:var(--bg-subtle);border-radius:4px;color:var(--text-secondary);">
+  submissionsDiv.innerHTML = homeworkStore[key].slice(-5).reverse().map((s, i) => {
+    const fileLink = s.storedName ? `<a href="/api/uploads/${s.storedName}" target="_blank" style="color:var(--accent);font-size:11px;">📎 ${s.fileName}</a>` : '';
+    return `<div style="font-size:12px;padding:6px 10px;margin-top:4px;background:var(--bg-subtle);border-radius:4px;color:var(--text-secondary);">
       <span style="color:var(--text-tertiary);">${s.time} 提交</span> — ${s.content.substring(0, 80)}${s.content.length > 80 ? '…' : ''}
-    </div>`
-  ).join('');
+      ${fileLink}
+    </div>`;
+  }).join('');
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -555,15 +681,21 @@ function renderMaterials(moduleId, lessonIdx, published, isTeacher) {
   published = published || [];
   isTeacher = isTeacher || false;
 
+  function isVisible(gateKey) {
+    var idx = (mat.materialGate || {})[gateKey];
+    if (idx === undefined) return true;
+    return isTeacher || published.includes(idx);
+  }
+
   let html = '';
 
   // 交互地图（模块一第1课）
-  if (mat.showMap) {
+  if (mat.showMap && isVisible('map')) {
     html += getInteractiveMapHTML();
   }
 
   // 关键数据卡片
-  if (mat.keyData && mat.keyData.length) {
+  if (mat.keyData && mat.keyData.length && isVisible('keyData')) {
     html += `<div class="mat-block">
       <div class="mat-label">📊 关键数据</div>
       <div class="data-cards">
@@ -595,6 +727,7 @@ function renderMaterials(moduleId, lessonIdx, published, isTeacher) {
       const isPub = published.includes(i);
       if (isTeacher) {
         // 教师：显示全部 + 发布/取消按钮
+        const resFiles = mat.activityResources && mat.activityResources[i] ? mat.activityResources[i] : [];
         html += `
         <div class="framework-item" style="border-left:3px solid ${isPub ? 'var(--accent)' : 'var(--border)'};">
           <span class="fw-time">⏱ ${act.time}</span>
@@ -602,20 +735,21 @@ function renderMaterials(moduleId, lessonIdx, published, isTeacher) {
             <strong>${act.title}</strong>
             <span class="publish-status ${isPub ? 'pub' : 'draft'}">${isPub ? '已发布' : '未发布'}</span>
             <p style="margin:4px 0 0;font-size:12px;line-height:1.6;">${act.desc}</p>
-            ${act.resource ? `<p style="margin:4px 0 0;font-size:11px;color:var(--accent);">📎 ${act.resource}</p>` : ''}
+            ${resFiles.length ? `<p style="margin:4px 0 0;font-size:11px;">📎 ${resFiles.map(f => `<a href="/${f}" target="_blank" style="color:var(--accent);text-decoration:none;border-bottom:1px dashed var(--accent);margin-right:8px;" download>${f.split('/').pop()}</a>`).join('')}</p>` : ''}
             <p style="margin:4px 0 0;font-size:11px;color:var(--orange);">📌 ${act.task}</p>
             <button class="publish-toggle ${isPub ? 'published' : ''}" onclick="${isPub ? `unpublishOne('${key}', ${i})` : `publishOne('${key}', ${i})`}">${isPub ? '取消发布' : '▶ 发布此活动'}</button>
           </div>
         </div>`;
       } else if (isPub) {
         // 学生：仅显示已发布的活动
+        const resFiles = mat.activityResources && mat.activityResources[i] ? mat.activityResources[i] : [];
         html += `
         <div class="framework-item" style="border-left:3px solid var(--accent);">
           <span class="fw-time">⏱ ${act.time}</span>
           <div class="fw-text">
             <strong>${act.title}</strong>
             <p style="margin:4px 0 0;font-size:12px;line-height:1.6;">${act.desc}</p>
-            ${act.resource ? `<p style="margin:4px 0 0;font-size:11px;color:var(--accent);">📎 ${act.resource}</p>` : ''}
+            ${resFiles.length ? `<p style="margin:4px 0 0;font-size:11px;">📎 ${resFiles.map(f => `<a href="/${f}" target="_blank" style="color:var(--accent);text-decoration:none;border-bottom:1px dashed var(--accent);margin-right:8px;" download>${f.split('/').pop()}</a>`).join('')}</p>` : ''}
             <p style="margin:4px 0 0;font-size:11px;color:var(--orange);">📌 ${act.task}</p>
           </div>
         </div>`;
@@ -635,7 +769,7 @@ function renderMaterials(moduleId, lessonIdx, published, isTeacher) {
   }
 
   // 系统结构图（模块二第1课）
-  if (mat.systemsDiagram && mat.systemsDiagram.length) {
+  if (mat.systemsDiagram && mat.systemsDiagram.length && isVisible('systemsDiagram')) {
     html += `<div class="mat-block">
       <div class="mat-label">🤖 机器人四大核心系统</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">`;
@@ -654,7 +788,7 @@ function renderMaterials(moduleId, lessonIdx, published, isTeacher) {
   }
 
   // 仿生对照表（模块二第1课）
-  if (mat.bionicTable && mat.bionicTable.rows) {
+  if (mat.bionicTable && mat.bionicTable.rows && isVisible('bionicTable')) {
     html += `<div class="mat-block">
       <div class="mat-label">${mat.bionicTable.title}</div>
       <div style="overflow-x:auto;">
@@ -669,7 +803,7 @@ function renderMaterials(moduleId, lessonIdx, published, isTeacher) {
   }
 
   // 评价框架（模块二第2课）
-  if (mat.evalFramework && mat.evalFramework.length) {
+  if (mat.evalFramework && mat.evalFramework.length && isVisible('evalFramework')) {
     html += `<div class="mat-block">
       <div class="mat-label">⭐ 五维机器人评价框架</div>
       <div class="framework">`;
@@ -688,7 +822,7 @@ function renderMaterials(moduleId, lessonIdx, published, isTeacher) {
 
   // 机器人对比表（模块二第2课）
   ['robotCompare','compareTable','raceDataTable','compareMedia'].forEach(prop => {
-    if (mat[prop] && mat[prop].rows) {
+    if (mat[prop] && mat[prop].rows && isVisible(prop)) {
       html += `<div class="mat-block">
         <div class="mat-label">${mat[prop].title}</div>
         <div style="overflow-x:auto;">
@@ -704,7 +838,7 @@ function renderMaterials(moduleId, lessonIdx, published, isTeacher) {
   });
 
   // 分析框架（模块三第1课等）
-  if (mat.analysisFramework && mat.analysisFramework.length) {
+  if (mat.analysisFramework && mat.analysisFramework.length && isVisible('analysisFramework')) {
     html += `<div class="mat-block">
       <div class="mat-label">🔬 四维赛事分析框架</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">`;
@@ -721,7 +855,7 @@ function renderMaterials(moduleId, lessonIdx, published, isTeacher) {
   }
 
   // 产业链框架（模块一第2课）
-  if (mat.chainFramework && mat.chainFramework.layers) {
+  if (mat.chainFramework && mat.chainFramework.layers && isVisible('chainFramework')) {
     html += `<div class="mat-block">
       <div class="mat-label">${mat.chainFramework.title}</div>
       <div style="display:flex;flex-direction:column;gap:6px;">`;
@@ -739,7 +873,7 @@ function renderMaterials(moduleId, lessonIdx, published, isTeacher) {
   }
 
   // 企业卡片（模块一第2课）
-  if (mat.companies && mat.companies.length) {
+  if (mat.companies && mat.companies.length && isVisible('companies')) {
     html += `<div class="mat-block">
       <div class="mat-label">🏢 亦庄代表机器人企业</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">`;
@@ -757,7 +891,7 @@ function renderMaterials(moduleId, lessonIdx, published, isTeacher) {
   }
 
   // 政策时间线（模块一第3课）
-  if (mat.policyTimeline && mat.policyTimeline.length) {
+  if (mat.policyTimeline && mat.policyTimeline.length && isVisible('policyTimeline')) {
     html += `<div class="mat-block">
       <div class="mat-label">📜 国家机器人产业政策演进</div>
       <div style="display:flex;flex-direction:column;gap:8px;">`;
@@ -775,7 +909,7 @@ function renderMaterials(moduleId, lessonIdx, published, isTeacher) {
   }
 
   // 故障案例（模块三第2课）
-  if (mat.faultCases && mat.faultCases.length) {
+  if (mat.faultCases && mat.faultCases.length && isVisible('faultCases')) {
     html += `<div class="mat-block">
       <div class="mat-label">⚠ 典型故障案例力学归因分析</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">`;
@@ -798,7 +932,7 @@ function renderMaterials(moduleId, lessonIdx, published, isTeacher) {
   }
 
   // 天气数据（模块三第2课）
-  if (mat.weatherData && mat.weatherData.length) {
+  if (mat.weatherData && mat.weatherData.length && isVisible('weatherData')) {
     html += `<div class="mat-block">
       <div class="mat-label">🌤 赛事当日环境数据</div>
       <div class="data-cards">
@@ -813,7 +947,7 @@ function renderMaterials(moduleId, lessonIdx, published, isTeacher) {
   }
 
   // 设计参数表（模块二第3课）
-  if (mat.designParams && mat.designParams.rows) {
+  if (mat.designParams && mat.designParams.rows && isVisible('designParams')) {
     html += `<div class="mat-block">
       <div class="mat-label">${mat.designParams.title}</div>
       <div style="overflow-x:auto;">
@@ -828,7 +962,7 @@ function renderMaterials(moduleId, lessonIdx, published, isTeacher) {
   }
 
   // 赛道特征卡片（模块二第3课）
-  if (mat.trackFeatures && mat.trackFeatures.length) {
+  if (mat.trackFeatures && mat.trackFeatures.length && isVisible('trackFeatures')) {
     html += `<div class="mat-block">
       <div class="mat-label">🏟 赛道环境特征（设计约束）</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">`;
@@ -847,7 +981,7 @@ function renderMaterials(moduleId, lessonIdx, published, isTeacher) {
   }
 
   // 制衡关系矩阵（模块三第3课）
-  if (mat.tradeoffMatrix && mat.tradeoffMatrix.relations) {
+  if (mat.tradeoffMatrix && mat.tradeoffMatrix.relations && isVisible('tradeoffMatrix')) {
     html += `<div class="mat-block">
       <div class="mat-label">${mat.tradeoffMatrix.title}</div>
       <div style="display:flex;flex-direction:column;gap:8px;">`;
@@ -865,7 +999,7 @@ function renderMaterials(moduleId, lessonIdx, published, isTeacher) {
   }
 
   // 策略对比表（模块三第3课）
-  if (mat.strategies && mat.strategies.length) {
+  if (mat.strategies && mat.strategies.length && isVisible('strategies')) {
     html += `<div class="mat-block">
       <div class="mat-label">🎯 差异化参赛策略对比</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">`;
@@ -882,7 +1016,7 @@ function renderMaterials(moduleId, lessonIdx, published, isTeacher) {
   }
 
   // 新闻结构（模块四第1课）
-  if (mat.newsStructure && mat.newsStructure.length) {
+  if (mat.newsStructure && mat.newsStructure.length && isVisible('newsStructure')) {
     html += `<div class="mat-block">
       <div class="mat-label">📰 科技新闻五段式结构</div>
       <div style="display:flex;flex-direction:column;gap:6px;">`;
@@ -897,7 +1031,7 @@ function renderMaterials(moduleId, lessonIdx, published, isTeacher) {
   }
 
   // 创作任务（模块四第2课）
-  if (mat.creationTasks && mat.creationTasks.length) {
+  if (mat.creationTasks && mat.creationTasks.length && isVisible('creationTasks')) {
     html += `<div class="mat-block">
       <div class="mat-label">🎨 三类创作任务详情</div>
       <div style="display:flex;flex-direction:column;gap:8px;">`;
@@ -916,7 +1050,7 @@ function renderMaterials(moduleId, lessonIdx, published, isTeacher) {
   }
 
   // 通俗化方法（模块四第2课）
-  if (mat.simplifyMethods && mat.simplifyMethods.length) {
+  if (mat.simplifyMethods && mat.simplifyMethods.length && isVisible('simplifyMethods')) {
     html += `<div class="mat-block">
       <div class="mat-label">🔄 术语通俗化三大方法</div>
       <div style="display:flex;flex-direction:column;gap:8px;">`;
@@ -932,7 +1066,7 @@ function renderMaterials(moduleId, lessonIdx, published, isTeacher) {
   }
 
   // 评价量规（模块四第3课）
-  if (mat.rubric && mat.rubric.rows) {
+  if (mat.rubric && mat.rubric.rows && isVisible('rubric')) {
     html += `<div class="mat-block">
       <div class="mat-label">${mat.rubric.title}</div>
       <div style="overflow-x:auto;">
@@ -947,7 +1081,7 @@ function renderMaterials(moduleId, lessonIdx, published, isTeacher) {
   }
 
   // 人机对比（模块四第2/3课）
-  if (mat.humanVsAI && mat.humanVsAI.rows) {
+  if (mat.humanVsAI && mat.humanVsAI.rows && isVisible('humanVsAI')) {
     html += `<div class="mat-block">
       <div class="mat-label">${mat.humanVsAI.title}</div>
       <div style="overflow-x:auto;">
@@ -961,8 +1095,278 @@ function renderMaterials(moduleId, lessonIdx, published, isTeacher) {
     </div>`;
   }
 
+  // 政策关键词云（模块一第3课）
+  if (mat.wordCloud && mat.wordCloud.keywords && isVisible('wordCloud')) {
+    html += getWordCloudHTML(moduleId, lessonIdx, mat.wordCloud);
+  }
+
   // 作业提交区
-  html += getHomeworkHTML(moduleId, lessonIdx);
+  if (isVisible('homework')) {
+    html += getHomeworkHTML(moduleId, lessonIdx);
+  }
 
   return html;
+}
+
+// ═══════════════════════════════════════════════════════════
+// 政策关键词云（子问题1 课时三 活动一）— 小组协作共享版
+// ═══════════════════════════════════════════════════════════
+function getWordCloudHTML(moduleId, lessonIdx, wc) {
+  const uid = 'wc_' + moduleId + '_' + lessonIdx;
+  const lessonKey = moduleId + '_' + lessonIdx;
+  // 延迟初始化，等 DOM 就位后加载服务器数据
+  setTimeout(function() { initWordCloud(uid, lessonKey, wc.colors); }, 120);
+  return `
+    <div class="mat-block" id="${uid}_block">
+      <div class="mat-label">☁ ${wc.title} <span style="font-weight:400;font-size:11px;color:var(--accent);" id="${uid}_groupLabel"></span></div>
+      <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.6;">${wc.desc}</p>
+      <div class="wordcloud-wrap" id="${uid}">
+        <div class="wc-empty-placeholder" id="${uid}_empty">
+          <div class="wc-empty-icon">☁</div>
+          <p>词云图暂为空，等待小组成员添加关键词</p>
+          <p style="font-size:11px;color:var(--text-tertiary);">阅读政策文件后，在下方输入框添加你发现的关键词</p>
+        </div>
+      </div>
+      <div class="wc-legend">
+        <span><span class="dot" style="background:var(--accent);"></span>高频核心</span>
+        <span><span class="dot" style="background:#6d28d9;"></span>重要支撑</span>
+        <span><span class="dot" style="background:#0d9488;"></span>关联概念</span>
+        <button class="wc-clear-btn" onclick="clearHighlights_wordcloud('${uid}')">清除高亮</button>
+        <span style="font-size:10px;color:var(--text-tertiary);margin-left:4px;" id="${uid}_contributors"></span>
+      </div>
+      <div class="wc-add-row">
+        <input type="text" id="${uid}_input" placeholder="输入新的关键词（2-12字）..." onkeydown="if(event.key==='Enter')addKeyword_wordcloud('${uid}','${lessonKey}')">
+        <button onclick="addKeyword_wordcloud('${uid}','${lessonKey}')">添加</button>
+      </div>
+    </div>`;
+}
+
+// ── Word Cloud rendering helpers (group-aware, server-backed) ──
+var _wcStore = {};
+
+function initWordCloud(uid, lessonKey, colors) {
+  var container = document.getElementById(uid);
+  if (!container || container._rendered) return;
+  container._rendered = true;
+  container._colors = colors;
+  container._lessonKey = lessonKey;
+  // 从服务器加载小组词云数据
+  loadWordCloudFromServer(uid, lessonKey, colors);
+}
+
+function loadWordCloudFromServer(uid, lessonKey, colors) {
+  var container = document.getElementById(uid);
+  if (!container) return;
+  var emptyEl = document.getElementById(uid + '_empty');
+  var groupLabel = document.getElementById(uid + '_groupLabel');
+  var contribEl = document.getElementById(uid + '_contributors');
+
+  // 尝试从服务器加载（需登录 + 小组信息）
+  try {
+    var token = (typeof authToken !== 'undefined') ? authToken : localStorage.getItem('pbl_token');
+    if (!token) {
+      // 未登录：显示空状态
+      if (groupLabel) groupLabel.textContent = '（请先登录）';
+      return;
+    }
+    var apiBase = (typeof API_BASE !== 'undefined') ? API_BASE : '/api';
+    fetch(apiBase + '/wordcloud?lessonKey=' + encodeURIComponent(lessonKey), {
+      headers: { 'Authorization': 'Bearer ' + token }
+    }).then(function(res) {
+      if (!res.ok) throw new Error('load failed');
+      return res.json();
+    }).then(function(data) {
+      container._keywords = (data.keywords || []).map(function(k) {
+        return { text: k.text, weight: k.weight || 3, addedBy: k.addedBy };
+      });
+      container._groupId = data.groupId;
+      container._groupName = data.groupName;
+      if (groupLabel) groupLabel.textContent = data.groupName ? '— ' + data.groupName : '';
+      if (contribEl && data.contributors && data.contributors.length) {
+        contribEl.textContent = '贡献者: ' + data.contributors.join('、');
+      }
+      renderWordCloudTags(container);
+    }).catch(function() {
+      // 离线模式：尝试从本地加载
+      loadWordCloudLocal(uid);
+    });
+  } catch(e) {
+    loadWordCloudLocal(uid);
+  }
+}
+
+function loadWordCloudLocal(uid) {
+  var container = document.getElementById(uid);
+  if (!container) return;
+  var emptyEl = document.getElementById(uid + '_empty');
+  var groupLabel = document.getElementById(uid + '_groupLabel');
+  // 本地模式：从 localStorage 读取
+  try {
+    var key = 'wc_local_' + (container._lessonKey || uid);
+    var saved = localStorage.getItem(key);
+    if (saved) {
+      container._keywords = JSON.parse(saved);
+      container._groupName = '本地模式';
+      if (groupLabel) groupLabel.textContent = '（离线模式）';
+      renderWordCloudTags(container);
+    } else {
+      container._keywords = [];
+      if (groupLabel) groupLabel.textContent = '（离线模式）';
+    }
+  } catch(e) {
+    container._keywords = [];
+  }
+}
+
+function saveWordCloudToServer(uid, lessonKey) {
+  var container = document.getElementById(uid);
+  if (!container || !container._keywords) return;
+  try {
+    var token = (typeof authToken !== 'undefined') ? authToken : localStorage.getItem('pbl_token');
+    if (!token) { saveWordCloudLocal(uid, lessonKey); return; }
+    var apiBase = (typeof API_BASE !== 'undefined') ? API_BASE : '/api';
+    fetch(apiBase + '/wordcloud', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({
+        lessonKey: lessonKey,
+        keywords: container._keywords.map(function(k) { return { text: k.text, weight: k.weight, addedBy: k.addedBy }; })
+      })
+    }).catch(function() {
+      saveWordCloudLocal(uid, lessonKey);
+    });
+  } catch(e) {
+    saveWordCloudLocal(uid, lessonKey);
+  }
+}
+
+function saveWordCloudLocal(uid, lessonKey) {
+  var container = document.getElementById(uid);
+  if (!container || !container._keywords) return;
+  try {
+    var key = 'wc_local_' + (lessonKey || container._lessonKey || uid);
+    localStorage.setItem(key, JSON.stringify(container._keywords));
+  } catch(e) {}
+}
+
+function renderWordCloudTags(container) {
+  var keywords = container._keywords || [];
+  var colors = container._colors || ['#1a56db','#6d28d9','#0d9488','#ea5a0c'];
+  var emptyEl = document.getElementById(container.id + '_empty');
+
+  // 移除旧标签（保留 empty placeholder）
+  var oldTags = container.querySelectorAll('.wc-tag');
+  for (var i = 0; i < oldTags.length; i++) { oldTags[i].remove(); }
+
+  if (!keywords.length) {
+    if (emptyEl) emptyEl.style.display = '';
+    return;
+  }
+  if (emptyEl) emptyEl.style.display = 'none';
+
+  var shuffled = keywords.slice().sort(function(){ return Math.random() - 0.5; });
+  var fragment = document.createDocumentFragment();
+  shuffled.forEach(function(kw, i) {
+    var sizeClass = kw.weight >= 5 ? 's1' : kw.weight >= 4 ? 's2' : kw.weight >= 3 ? 's3' : 's4';
+    var color = colors[i % colors.length];
+    var rot = (Math.random() * 6 - 3).toFixed(1);
+    var tag = document.createElement('span');
+    tag.className = 'wc-tag ' + sizeClass;
+    tag.style.cssText = 'color:' + color + ';background:' + color + '12;animation-delay:' + (i * 0.03).toFixed(2) + 's;transform:rotate(' + rot + 'deg);';
+    tag.setAttribute('data-text', kw.text.replace(/"/g, '&quot;'));
+    var textNode = document.createTextNode(kw.text);
+    tag.appendChild(textNode);
+    // × 删除按钮
+    var delBtn = document.createElement('span');
+    delBtn.className = 'wc-del';
+    delBtn.textContent = '×';
+    delBtn.title = '删除此关键词';
+    delBtn.onclick = function(e) {
+      e.stopPropagation();
+      removeKeyword_wordcloud(container, kw.text);
+    };
+    tag.appendChild(delBtn);
+    tag.onclick = function(e) {
+      if (e.target === delBtn) return;
+      toggleHighlight_wordcloud(tag);
+    };
+    if (kw.addedBy) tag.title = '由 ' + kw.addedBy + ' 添加';
+    fragment.appendChild(tag);
+  });
+  container.appendChild(fragment);
+}
+
+function toggleHighlight_wordcloud(el) {
+  el.classList.toggle('highlighted');
+}
+
+function clearHighlights_wordcloud(uid) {
+  var container = document.getElementById(uid);
+  if (!container) return;
+  var tags = container.querySelectorAll('.wc-tag');
+  for (var i = 0; i < tags.length; i++) { tags[i].classList.remove('highlighted'); }
+}
+
+function addKeyword_wordcloud(uid, lessonKey) {
+  var input = document.getElementById(uid + '_input');
+  if (!input) return;
+  var text = input.value.trim();
+  if (!text || text.length < 2 || text.length > 12) return;
+  var container = document.getElementById(uid);
+  if (!container) return;
+
+  // 检查重复（同组内相同关键词合并，增大权重）
+  var keywords = container._keywords || [];
+  var existing = null;
+  for (var i = 0; i < keywords.length; i++) {
+    if (keywords[i].text === text) { existing = keywords[i]; break; }
+  }
+
+  var currentUsername = '我';
+  try {
+    if (typeof currentUser !== 'undefined' && currentUser) currentUsername = currentUser.username;
+  } catch(e) {}
+
+  if (existing) {
+    // 重复关键词：增加权重（最高5）
+    existing.weight = Math.min(5, (existing.weight || 3) + 1);
+    if (existing.addedBy && existing.addedBy.indexOf(currentUsername) < 0) {
+      existing.addedBy = existing.addedBy + '、' + currentUsername;
+    }
+  } else {
+    keywords.push({ text: text, weight: 3, addedBy: currentUsername });
+  }
+  container._keywords = keywords;
+  input.value = '';
+  input.focus();
+
+  // 重新渲染
+  renderWordCloudTags(container);
+
+  // 保存到服务器（小组共享）
+  saveWordCloudToServer(uid, lessonKey);
+}
+
+function removeKeyword_wordcloud(container, text) {
+  if (!container || !container._keywords) return;
+  var keywords = container._keywords;
+  // 找到匹配的关键词
+  var idx = -1;
+  for (var i = 0; i < keywords.length; i++) {
+    if (keywords[i].text === text) { idx = i; break; }
+  }
+  if (idx < 0) return;
+  var kw = keywords[idx];
+  // 如果权重大于1，降低权重（减1）而不是直接删除
+  if (kw.weight > 1) {
+    kw.weight = Math.max(1, kw.weight - 1);
+  } else {
+    // 权重为1，直接删除
+    keywords.splice(idx, 1);
+  }
+  container._keywords = keywords;
+  // 重新渲染
+  renderWordCloudTags(container);
+  // 保存
+  saveWordCloudToServer(container.id, container._lessonKey);
 }

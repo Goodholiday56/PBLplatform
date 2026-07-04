@@ -37,6 +37,7 @@
   html { scroll-behavior: smooth; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+    font-size: 18.5px;
     background: var(--bg);
     color: var(--text);
     line-height: 1.6;
@@ -461,7 +462,7 @@
   .mstat .val { font-size: 18px; font-weight: 700; }
   .mstat .lbl { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
   .modal-body h4 { font-size: 13px; font-weight: 700; margin: 20px 0 8px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
-  .modal-body p  { font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
+  .modal-body p  { font-size: 15px; color: var(--text-secondary); line-height: 1.7; }
   .chapter-row {
     display: flex; align-items: center; gap: 12px;
     padding: 10px 12px; border-radius: 6px; font-size: 13px;
@@ -534,23 +535,23 @@
     border-radius: var(--radius) 0 0 0;
     opacity: 0.8;
   }
-  .content-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.2px; }
-  .content-card .content-sub { font-size: 12px; color: var(--text-tertiary); margin-bottom: 20px; }
-  .content-card .content-body { font-size: 14px; color: var(--text-secondary); line-height: 1.75; }
+  .content-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.2px; }
+  .content-card .content-sub { font-size: 13px; color: var(--text-tertiary); margin-bottom: 20px; }
+  .content-card .content-body { font-size: 16px; color: var(--text-secondary); line-height: 1.75; }
   .content-card .highlight-box {
     background: var(--accent-light); border-left: 3px solid var(--accent);
     padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 16px 0;
-    font-size: 13px; color: var(--accent); font-weight: 500;
+    font-size: 15px; color: var(--accent); font-weight: 500;
   }
   .content-card .task-box {
     background: var(--orange-light); border-left: 3px solid var(--orange);
     padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 16px 0;
-    font-size: 13px; color: var(--text-secondary);
+    font-size: 15px; color: var(--text-secondary);
   }
   .learn-bottom {
     padding: 12px 24px; border-top: 1px solid var(--border-light);
     display: flex; align-items: center; justify-content: space-between;
-    background: var(--bg-card); font-size: 13px;
+    background: var(--bg-card); font-size: 14px;
   }
   .progress-track {
     width: 100px; height: 4px; background: var(--border-light);
@@ -709,7 +710,7 @@
   .mat-block:nth-child(5) { animation-delay: 0.2s; }
 
   .mat-label {
-    font-size: 10px; font-weight: 700; color: var(--text-tertiary);
+    font-size: 11px; font-weight: 700; color: var(--text-tertiary);
     text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;
   }
 
@@ -719,8 +720,8 @@
     background: var(--bg-subtle); border-radius: var(--radius-sm); padding: 14px;
     border-left: 3px solid var(--accent);
   }
-  .concept-card .cc-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
-  .concept-card .cc-body  { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+  .concept-card .cc-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .concept-card .cc-body  { font-size: 13px; color: var(--text-secondary); line-height: 1.55; }
   .concept-card .cc-num   {
     font-size: 11px; font-weight: 700; color: var(--accent);
     width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center;
@@ -728,11 +729,11 @@
   }
 
   /* Data table */
-  .mat-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .mat-table { width: 100%; border-collapse: collapse; font-size: 14px; }
   .mat-table th {
     text-align: left; padding: 8px 12px; background: var(--bg-subtle);
     font-weight: 600; color: var(--text-secondary); border-bottom: 2px solid var(--border-light);
-    font-size: 11px; text-transform: uppercase; letter-spacing: 0.3px;
+    font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px;
   }
   .mat-table td {
     padding: 8px 12px; border-bottom: 1px solid var(--border-light);
@@ -746,7 +747,7 @@
   .framework-item {
     display: flex; align-items: flex-start; gap: 10px;
     padding: 10px 12px; background: var(--bg-subtle); border-radius: var(--radius-sm);
-    font-size: 12.5px; line-height: 1.5;
+    font-size: 14px; line-height: 1.5;
   }
   .fw-num {
     width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
@@ -783,8 +784,8 @@
     border-radius: var(--radius-sm); padding: 14px; text-align: center;
   }
   .data-card .dc-val  { font-size: 22px; font-weight: 700; color: var(--accent); letter-spacing: -0.5px; }
-  .data-card .dc-unit { font-size: 12px; color: var(--text-tertiary); }
-  .data-card .dc-lbl  { font-size: 11px; color: var(--text-tertiary); margin-top: 4px; }
+  .data-card .dc-unit { font-size: 13px; color: var(--text-tertiary); }
+  .data-card .dc-lbl  { font-size: 12px; color: var(--text-tertiary); margin-top: 4px; }
 
   /* Quote */
   .mat-quote {
@@ -874,10 +875,10 @@
     font-size: 13px; font-weight: 700; flex-shrink: 0;
   }
   .post-meta { flex: 1; }
-  .post-author { font-size: 13px; font-weight: 600; }
-  .post-time { font-size: 11px; color: var(--text-tertiary); margin-top: 1px; }
+  .post-author { font-size: 14px; font-weight: 600; }
+  .post-time { font-size: 12px; color: var(--text-tertiary); margin-top: 1px; }
   .post-content {
-    font-size: 13.5px; line-height: 1.7; color: var(--text);
+    font-size: 15px; line-height: 1.7; color: var(--text);
     white-space: pre-wrap; word-break: break-word;
   }
   .post-footer {
@@ -893,6 +894,12 @@
   .post-action:hover { background: var(--bg-hover); color: var(--text-secondary); }
   .post-action.liked { color: #e74c3c; }
   .post-action .action-icon { font-size: 15px; }
+  .post-del-btn {
+    margin-left: auto; padding: 4px 8px; border: none; background: transparent;
+    color: var(--text-tertiary); cursor: pointer; border-radius: 4px;
+    font-size: 14px; transition: all 0.15s ease; flex-shrink: 0;
+  }
+  .post-del-btn:hover { color: #dc2626; background: #fef2f2; }
 
   /* Comment area */
   .comment-area {
@@ -962,6 +969,96 @@
     opacity: 0.55; background: var(--bg-subtle); border-left-color: var(--border) !important;
   }
   .activity-locked:hover { opacity: 0.75; }
+
+  /* ── Word Cloud ── */
+  .wordcloud-wrap {
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: 28px 20px;
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+    gap: 10px 14px; min-height: 180px;
+    position: relative; overflow: hidden;
+  }
+  .wordcloud-wrap::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at center, rgba(26,86,219,0.03) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .wc-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 8px 5px 14px; border-radius: 20px;
+    cursor: pointer; transition: all 0.25s ease;
+    position: relative; z-index: 1;
+    user-select: none; white-space: nowrap;
+    animation: wc-in 0.4s ease both;
+    border: 1.5px solid transparent;
+  }
+  .wc-tag .wc-del {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 18px; height: 18px; border-radius: 50%;
+    font-size: 13px; line-height: 1; color: inherit; opacity: 0.45;
+    cursor: pointer; transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+  .wc-tag .wc-del:hover {
+    opacity: 1; background: rgba(220,38,38,0.15); color: #dc2626;
+  }
+  .wc-tag:hover {
+    transform: scale(1.12); z-index: 5;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  }
+  .wc-tag.highlighted {
+    transform: scale(1.08);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    border-color: currentColor;
+  }
+  .wc-tag.s1 { font-size: 26px; font-weight: 700; padding: 9px 22px; }
+  .wc-tag.s2 { font-size: 22px; font-weight: 700; padding: 8px 19px; }
+  .wc-tag.s3 { font-size: 17px; font-weight: 600; padding: 7px 16px; }
+  .wc-tag.s4 { font-size: 15px; font-weight: 500; padding: 5px 13px; }
+  @keyframes wc-in {
+    from { opacity: 0; transform: scale(0.5) translateY(8px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .wc-empty-placeholder {
+    position: absolute; inset: 0; display: flex;
+    flex-direction: column; align-items: center; justify-content: center;
+    color: var(--text-tertiary); pointer-events: none;
+    z-index: 0;
+  }
+  .wc-empty-icon { font-size: 40px; opacity: 0.3; margin-bottom: 8px; }
+  .wc-empty-placeholder p { font-size: 13px; margin: 2px 0; }
+  .wc-add-row {
+    margin-top: 12px; display: flex; gap: 8px; justify-content: center;
+  }
+  .wc-add-row input {
+    padding: 8px 14px; border: 1px solid var(--border);
+    border-radius: 20px; font-size: 13px; outline: none; width: 200px;
+    font-family: inherit; transition: var(--transition);
+  }
+  .wc-add-row input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+  .wc-add-row button {
+    padding: 8px 18px; border-radius: 20px; border: none; background: var(--accent);
+    color: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
+    font-family: inherit; transition: var(--transition);
+  }
+  .wc-add-row button:hover { background: var(--accent-hover); }
+  .wc-legend {
+    display: flex; gap: 12px; justify-content: center; margin-top: 10px;
+    font-size: 11px; color: var(--text-tertiary); flex-wrap: wrap;
+  }
+  .wc-legend span { display: flex; align-items: center; gap: 4px; }
+  .wc-legend .dot {
+    width: 8px; height: 8px; border-radius: 50%; display: inline-block;
+  }
+  .wc-clear-btn {
+    font-size: 11px; color: var(--text-tertiary); cursor: pointer;
+    background: none; border: none; font-family: inherit; padding: 2px 6px;
+    border-radius: 4px; transition: var(--transition);
+  }
+  .wc-clear-btn:hover { color: #dc2626; background: #fef2f2; }
 
   /* ── Responsive ── */
   @media (max-width: 768px) {
@@ -1380,6 +1477,70 @@
   }
   .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
 
+  /* ── 小组管理 ── */
+  .groups-panel { display: flex; flex-direction: column; gap: 16px; }
+  .group-card {
+    background: var(--bg-card); border: 1px solid var(--border-light);
+    border-radius: var(--radius); padding: 18px; transition: var(--transition);
+  }
+  .group-card:hover { border-color: var(--accent); box-shadow: var(--shadow-sm); }
+  .group-card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .group-card-header h4 { font-size: 15px; font-weight: 700; margin: 0; }
+  .group-card-header .group-actions { display: flex; gap: 6px; }
+  .group-card-header .group-actions button {
+    padding: 4px 12px; border: 1px solid var(--border); border-radius: 14px;
+    background: var(--bg-subtle); font-size: 11px; cursor: pointer;
+    color: var(--text-secondary); font-family: inherit; transition: var(--transition);
+  }
+  .group-card-header .group-actions button:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .group-card-header .group-actions button.danger:hover { background: #e74c3c; border-color: #e74c3c; }
+  .group-members { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .group-member-tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 10px; border-radius: 14px; background: var(--bg-subtle);
+    font-size: 12px; color: var(--text); transition: var(--transition);
+  }
+  .group-member-tag .remove-member {
+    cursor: pointer; font-size: 14px; color: var(--text-tertiary);
+    line-height: 1; transition: var(--transition);
+  }
+  .group-member-tag .remove-member:hover { color: #e74c3c; }
+  .group-add-member { margin-top: 10px; display: flex; gap: 8px; }
+  .group-add-member select {
+    flex: 1; padding: 6px 10px; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); font-size: 12px; font-family: inherit;
+    background: var(--bg-card); outline: none;
+  }
+  .group-add-member button {
+    padding: 6px 14px; border-radius: var(--radius-sm); border: none;
+    background: var(--accent); color: #fff; font-size: 12px; font-weight: 600;
+    cursor: pointer; font-family: inherit;
+  }
+  .group-create-row {
+    display: flex; gap: 10px; padding: 16px; background: var(--bg-subtle);
+    border-radius: var(--radius); border: 2px dashed var(--border);
+    align-items: center;
+  }
+  .group-create-row input {
+    flex: 1; padding: 8px 14px; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); font-size: 13px; font-family: inherit; outline: none;
+  }
+  .group-create-row input:focus { border-color: var(--accent); }
+  .group-create-row button {
+    padding: 8px 20px; border-radius: var(--radius-sm); border: none;
+    background: var(--text); color: #fff; font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: inherit; white-space: nowrap;
+  }
+  .no-group-students {
+    margin-top: 20px; padding: 14px; background: var(--bg-subtle);
+    border-radius: var(--radius); border: 1px solid var(--border-light);
+  }
+  .no-group-students h5 { font-size: 13px; font-weight: 700; margin: 0 0 8px; color: var(--text-secondary); }
+  .no-group-students .student-list { display: flex; flex-wrap: wrap; gap: 6px; }
+
 
   /* ── Design Studio ── */
   .studio-view {
@@ -1627,7 +1788,7 @@
     <div class="ai-panel-head">
       <span class="ai-dot"></span>
       <span style="flex:1;">AI 学习助手</span>
-      <span class="ai-badge" id="aiBadge">GLM-4-Flash</span>
+      <span class="ai-badge" id="aiBadge">DeepSeek</span>
     </div>
     <div class="ai-chat-area" id="aiChatArea">
       <div class="ai-msg bot">
@@ -1695,7 +1856,7 @@
     <div class="ai-panel-head">
       <span class="ai-dot"></span>
       <span style="flex:1;">AI 助手</span>
-      <span class="ai-badge">GLM-4-Flash</span>
+      <span class="ai-badge">DeepSeek</span>
     </div>
     <div class="ai-chat-area" id="workshopAiChat">
       <div class="ai-msg bot">
@@ -1725,6 +1886,7 @@
         <button class="dashboard-tab" id="dashTabWorks" onclick="switchDashTab('works')">作品评阅</button>
         <button class="dashboard-tab" id="dashTabSummary" onclick="switchDashTab('summary')">评价汇总</button>
         <button class="dashboard-tab" id="dashTabAnalysis" onclick="switchDashTab('analysis')">AI学情</button>
+        <button class="dashboard-tab" id="dashTabGroups" onclick="switchDashTab('groups')">小组管理</button>
       </div>
       <button class="btn-sm ghost" onclick="closeDashboard()">关闭</button>
     </div>
@@ -2012,7 +2174,8 @@ async function apiCall(method, route, body) {
       localStorage.removeItem('pbl_user');
       updateNavUser();
     }
-    serverAvailable = false; return null;
+    // 4xx errors don't mean the server is down — don't set serverAvailable=false
+    return null;
   } catch {
     serverAvailable = false; return null;
   }
@@ -2095,9 +2258,9 @@ async function loadReflections() {
   if (serverAvailable) {
     statusDot.style.background = '#0d9488';
     statusDot.title = '服务器已连接 - 数据云端同步';
-    if (footerConn) footerConn.textContent = '服务已连接 · 数据云端同步 · AI: 智谱GLM-4-Flash';
+    if (footerConn) footerConn.textContent = '服务已连接 · 数据云端同步 · AI: DeepSeek';
     const badge = document.getElementById('aiBadge');
-    if (badge) { badge.textContent = 'GLM-4-Flash'; badge.style.background = '#e6f7f5'; badge.style.color = '#0d9488'; }
+    if (badge) { badge.textContent = 'DeepSeek'; badge.style.background = '#e6f7f5'; badge.style.color = '#0d9488'; }
     if (currentUser) {
       await loadProgress();
       await loadReflections();
@@ -2126,6 +2289,56 @@ async function loadReflections() {
   }
   renderCourses();
 })();
+
+// ── URL Hash 状态持久化 ──
+function syncHash() {
+  if (document.getElementById('learnView').classList.contains('open') && curCourse) {
+    location.hash = 'learn/' + curCourse.id + '/' + curChapIdx + (discussionTab === 'discussion' ? '/discussion' : '');
+  } else if (document.getElementById('workshopView').classList.contains('open')) {
+    location.hash = 'workshop/' + workshopLessonKey;
+  } else if (document.getElementById('dashboardView').classList.contains('open')) {
+    location.hash = 'dashboard/' + dashTab;
+  } else if (document.getElementById('studioView').classList.contains('open')) {
+    location.hash = 'studio';
+  } else {
+    history.replaceState(null, '', location.pathname + location.search);
+  }
+}
+
+function restoreFromHash() {
+  var hash = location.hash.slice(1);
+  if (!hash) return;
+  var parts = hash.split('/');
+  if (parts[0] === 'learn' && parts[1]) {
+    var id = parseInt(parts[1]);
+    var chap = parseInt(parts[2]) || 0;
+    if (!currentUser) { showAuthModal('login'); return; }
+    if (!courses.find(function(c) { return c.id === id; })) return;
+    curCourse = courses.find(function(c) { return c.id === id; });
+    if (!enrolled.has(id)) { enrolled.add(id); if (!completedLessons[id]) completedLessons[id] = new Set(); }
+    curChapIdx = chap;
+    discussionTab = parts[3] === 'discussion' ? 'discussion' : 'content';
+    document.getElementById('learnView').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    document.getElementById('learnTitle').textContent = curCourse.title;
+    switchLearnTab(discussionTab);
+    updateLearnUI();
+  } else if (parts[0] === 'workshop' && parts[1]) {
+    if (!currentUser) { showAuthModal('login'); return; }
+    openWorkshop(parts[1]);
+  } else if (parts[0] === 'dashboard') {
+    if (!currentUser || !isTeacher) return;
+    openDashboard();
+    if (parts[1]) switchDashTab(parts[1]);
+  } else if (parts[0] === 'studio') {
+    if (!currentUser) { showAuthModal('login'); return; }
+    openDesignStudio();
+  }
+}
+
+setTimeout(function() {
+  if (currentUser || location.hash.slice(1).length > 0) restoreFromHash();
+}, 400);
 
 function renderCourses(filter = 'all', search = '') {
   let list = courses;
@@ -2300,7 +2513,7 @@ function startLearn(id) {
   document.getElementById('learnView').classList.add('open');
   document.body.style.overflow = 'hidden';
   document.getElementById('modalOverlay').classList.remove('open');
-  const aiModelLabel = serverAvailable ? '智谱·GLM-4-Flash' : '离线模拟模式';
+  const aiModelLabel = serverAvailable ? 'DeepSeek' : '离线模拟模式';
   document.getElementById('aiChatArea').innerHTML = `
     <div class="ai-msg bot">你好！我是「${curCourse.tagCN}：${curCourse.title.split('—')[0].trim()}」的 AI 学习助手（${aiModelLabel}）。<br><br>我能帮你：术语通俗化、文案润色、英文翻译、内容合规检查。所有AI输出请人工复核。点击下方快捷提问或直接输入问题。</div>
   `;
@@ -2328,15 +2541,38 @@ async function updateLearnUI() {
   document.getElementById('reflectionText').value = reflections[refKey] || '';
   document.getElementById('reflectionSaved').style.display = 'none';
 
-  document.getElementById('learnResourcesBody').innerHTML = curCourse.resources.map(r => `
-    <div class="res-item" onclick="showToast('资源下载中...（Demo）')">
-      <span class="res-dot"></span><span>${r}</span>
-      <span style="margin-left:auto;font-size:10px;color:var(--text-tertiary);">⬇</span>
-    </div>
-  `).join('');
-
-  // 加载发布状态
+  // 加载发布状态（必须放在资源渲染之前）
   await loadPublishState(curCourse.id + '_' + curChapIdx);
+
+  // 收集当前课时的实际资源文件（仅已发布活动，教师可见全部）
+  const matKey = curCourse.id + '_' + curChapIdx;
+  const mat = typeof lessonMaterials !== 'undefined' ? lessonMaterials[matKey] : null;
+  const allActFiles = [];
+  if (mat && mat.activityResources) {
+    for (const [idx, files] of Object.entries(mat.activityResources)) {
+      if (isTeacher || currentPublishState.includes(parseInt(idx))) {
+        allActFiles.push(...files);
+      }
+    }
+  }
+  if (allActFiles.length) {
+    document.getElementById('learnResourcesBody').innerHTML = allActFiles.map(f => {
+      const name = f.split('/').pop();
+      const ext = name.split('.').pop().toLowerCase();
+      const icon = ['jpg','jpeg','png','gif','svg'].includes(ext) ? '🖼' :
+                   ['xlsx','xls'].includes(ext) ? '📊' :
+                   ['docx','doc'].includes(ext) ? '📄' :
+                   ['md','txt'].includes(ext) ? '📝' : '📎';
+      return `
+      <a href="/${f}" target="_blank" download class="res-item" style="text-decoration:none;">
+        <span>${icon}</span><span>${name}</span>
+        <span style="margin-left:auto;font-size:10px;color:var(--text-tertiary);">⬇</span>
+      </a>`;
+    }).join('');
+  } else {
+    document.getElementById('learnResourcesBody').innerHTML = '<div class="res-item" style="cursor:default;color:var(--text-tertiary);"><span>本课时暂无配套文件</span></div>';
+  }
+
   const materialsHTML = renderMaterials(curCourse.id, curChapIdx, currentPublishState, isTeacher);
   document.getElementById('contentZone').innerHTML = `
     <div class="content-card">
@@ -2351,12 +2587,6 @@ async function updateLearnUI() {
           <strong>课堂任务：</strong>${ch[curChapIdx].task}
         </div>
         ${materialsHTML ? `<div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border-light);">${materialsHTML}</div>` : ''}
-        <p style="margin-top:20px;font-size:13px;">
-          <span style="color:var(--accent);font-weight:600;cursor:pointer;border-bottom:1px dashed var(--accent);"
-                onclick="document.getElementById('learnResources').classList.remove('collapsed');document.getElementById('learnResources').scrollIntoView({behavior:'smooth'});">
-            📎 左侧栏查看本模块配套资源（${curCourse.resources.length}项）
-          </span>
-        </p>
         ${curCourse.id === 4 ? `<div style="text-align:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--border-light);"><button class="btn btn-accent" style="font-size:14px;padding:12px 28px;" onclick="openWorkshop('4_${curChapIdx}')">✏️ 进入创作工坊</button><p style="font-size:11px;color:var(--text-tertiary);margin-top:6px;">选择创作方向，在AI辅助下完成你的科技传播作品</p></div>` : ''}
         ${curCourse.id === 2 && curChapIdx === 2 ? `<div style="text-align:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--border-light);"><button class="btn btn-accent" style="font-size:14px;padding:12px 28px;" onclick="openDesignStudio()">🔧 进入设计工作室</button><p style="font-size:11px;color:var(--text-tertiary);margin-top:6px;">绘制机器人设计图，标注五大系统，撰写设计说明</p></div>` : ''}
       </div>
@@ -2364,6 +2594,7 @@ async function updateLearnUI() {
   `;
   // 刷新讨论区帖子（保持当前tab不切换）
   if (serverAvailable) loadPosts(curCourse.id + '_' + curChapIdx);
+  syncHash();
 }
 
 function updateAiPrompts() {
@@ -2426,6 +2657,7 @@ function prevLesson() { if (curChapIdx > 0) { curChapIdx--; updateLearnUI(); } }
 function closeLearn() {
   document.getElementById('learnView').classList.remove('open');
   document.body.style.overflow = '';
+  syncHash();
 }
 
 // ── 教师端：活动发布 ──
@@ -2447,49 +2679,58 @@ async function loadPublishState(lessonKey) {
 
 async function publishOne(lessonKey, idx) {
   if (!serverAvailable) { showToast('服务器未连接'); return; }
-  try {
-    await apiCall('POST', '/teacher/publish', { lessonKey, activityIndex: idx });
+  const result = await apiCall('POST', '/teacher/publish', { lessonKey, activityIndex: idx });
+  if (result) {
     showToast('活动已发布');
     updateLearnUI();
-  } catch { showToast('发布失败'); }
+  } else {
+    showToast('发布失败，请检查网络或权限');
+  }
 }
 
 async function unpublishOne(lessonKey, idx) {
   if (!serverAvailable) { showToast('服务器未连接'); return; }
-  try {
-    await apiCall('POST', '/teacher/unpublish', { lessonKey, activityIndex: idx });
+  const result = await apiCall('POST', '/teacher/unpublish', { lessonKey, activityIndex: idx });
+  if (result) {
     showToast('已取消发布');
     updateLearnUI();
-  } catch { showToast('操作失败'); }
+  } else {
+    showToast('操作失败，请检查网络或权限');
+  }
 }
 
 async function publishAll(lessonKey, total) {
   if (!serverAvailable) return;
+  let anyFailed = false;
   // Check if all are already published
   if (currentPublishState.length >= total) {
     // Unpublish all
     for (let i = 0; i < total; i++) {
-      await apiCall('POST', '/teacher/unpublish', { lessonKey, activityIndex: i });
+      const result = await apiCall('POST', '/teacher/unpublish', { lessonKey, activityIndex: i });
+      if (!result) anyFailed = true;
     }
-    showToast('已全部取消发布');
+    showToast(anyFailed ? '部分取消失败' : '已全部取消发布');
   } else {
     // Publish remaining
     for (let i = 0; i < total; i++) {
       if (!currentPublishState.includes(i)) {
-        await apiCall('POST', '/teacher/publish', { lessonKey, activityIndex: i });
+        const result = await apiCall('POST', '/teacher/publish', { lessonKey, activityIndex: i });
+        if (!result) anyFailed = true;
       }
     }
-    showToast('已全部发布');
+    showToast(anyFailed ? '部分发布失败' : '已全部发布');
   }
   updateLearnUI();
 }
 
 async function unpublishAll(lessonKey) {
   if (!serverAvailable) return;
+  let anyFailed = false;
   for (const idx of currentPublishState) {
-    await apiCall('POST', '/teacher/unpublish', { lessonKey, activityIndex: idx });
+    const result = await apiCall('POST', '/teacher/unpublish', { lessonKey, activityIndex: idx });
+    if (!result) anyFailed = true;
   }
-  showToast('已全部取消发布');
+  showToast(anyFailed ? '部分取消失败' : '已全部取消发布');
   updateLearnUI();
 }
 
@@ -2507,6 +2748,7 @@ function switchLearnTab(tab) {
     const lessonKey = curCourse.id + '_' + curChapIdx;
     loadPosts(lessonKey);
   }
+  syncHash();
 }
 
 async function loadPosts(lessonKey) {
@@ -2535,6 +2777,7 @@ function renderPostList(posts) {
   }
   postList.innerHTML = posts.map(p => {
     const liked = p.likes && p.likes.includes(currentUser?.id);
+    const canDelete = currentUser && (currentUser.id === p.userId || isTeacher);
     return `
     <div class="post-card">
       <div class="post-card-header">
@@ -2544,6 +2787,7 @@ function renderPostList(posts) {
           <div class="post-time">${fmtTime(p.createdAt)}</div>
           ${currentUser && currentUser.id === p.userId ? '<span style="font-size:10px;color:var(--accent);font-weight:600;">(我的帖子)</span>' : ''}
         </div>
+        ${canDelete ? `<button class="post-del-btn" title="删除帖子" onclick="handleDeletePost(${p.id})">🗑</button>` : ''}
       </div>
       <div class="post-content">${escHtml(p.content)}</div>
       <div class="post-footer">
@@ -2581,6 +2825,19 @@ async function handleCreatePost() {
     loadPosts(lessonKey);
   } catch (e) {
     showToast('发布失败');
+  }
+}
+
+async function handleDeletePost(postId) {
+  if (!requireAuth()) return;
+  if (!confirm('确定要删除这条帖子吗？删除后无法恢复。')) return;
+  const result = await apiCall('DELETE', '/posts/' + postId);
+  if (result && result.ok) {
+    showToast('已删除');
+    const lessonKey = curCourse.id + '_' + curChapIdx;
+    loadPosts(lessonKey);
+  } else {
+    showToast('删除失败，请检查是否为本人的帖子或稍后重试');
   }
 }
 
@@ -2719,7 +2976,7 @@ async function sendAiMsg() {
       if (res.ok) {
         const data = await res.json();
         const prefix = data.source === 'fallback' ? '[离线模式] ' : '';
-        const suffix = data.source === 'zhipu' ? ' (智谱·GLM-4-Flash)' : '';
+        const suffix = data.source === 'deepseek' ? ' (DeepSeek)' : '';
         appendAiMsg('bot', prefix + data.reply + suffix);
         chatHistory.push({ role: 'assistant', content: data.reply });
         return;
@@ -2755,7 +3012,7 @@ async function sendQuickPrompt(prompt) {
       if (res.ok) {
         const data = await res.json();
         const prefix = data.source === 'fallback' ? '[离线模式] ' : '';
-        const suffix = data.source === 'zhipu' ? ' (智谱·GLM-4-Flash)' : '';
+        const suffix = data.source === 'deepseek' ? ' (DeepSeek)' : '';
         appendAiMsg('bot', prefix + data.reply + suffix);
         chatHistory.push({ role: 'assistant', content: data.reply });
         return;
@@ -2849,6 +3106,7 @@ function openWorkshop(lessonKey) {
 
   // Load existing work from server
   loadWorkshopWork();
+  syncHash();
 }
 
 function renderWorkshopTypes() {
@@ -3093,6 +3351,7 @@ async function closeWorkshop() {
   }
   document.getElementById('workshopView').classList.remove('open');
   clearTimeout(workshopAutoSaveTimer);
+  syncHash();
 }
 
 // ── Workshop AI Chat ──
@@ -3112,7 +3371,7 @@ async function sendWorkshopAiMsg(promptOverride) {
   const workContext = content ? `\n\n学生当前作品（类型：${creationTaskInfo[workshopWorkType].name}）：\n标题：${title}\n内容：${content}` : '';
 
   try {
-    const res = await fetch(API_BASE + '/ai/chat', {
+    const res = await fetch(API_BASE + '/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
       body: JSON.stringify({ message: msg + workContext })
@@ -3145,10 +3404,12 @@ async function openDashboard() {
   if (!currentUser || !isTeacher) { showToast('仅教师可访问'); return; }
   document.getElementById('dashboardView').classList.add('open');
   switchDashTab('overview');
+  syncHash();
 }
 
 function closeDashboard() {
   document.getElementById('dashboardView').classList.remove('open');
+  syncHash();
 }
 
 async function switchDashTab(tab) {
@@ -3167,7 +3428,9 @@ async function switchDashTab(tab) {
     case 'works': await renderWorksReview(body); break;
     case 'summary': await renderSummary(body); break;
     case 'analysis': await renderAnalysis(body); break;
+    case 'groups': await renderGroups(body); break;
   }
+  syncHash();
 }
 
 async function loadDashData() {
@@ -3395,6 +3658,141 @@ async function renderAnalysis(body) {
   }
 }
 
+// ── 小组管理（教师仪表盘） ──
+var _groupsCache = null;
+var _allStudentsCache = null;
+
+async function loadGroupsData() {
+  if (_groupsCache && _allStudentsCache) return;
+  const [groups, roster] = await Promise.all([
+    apiCall('GET', '/groups'),
+    apiCall('GET', '/teacher/roster')
+  ]);
+  _groupsCache = groups || [];
+  _allStudentsCache = roster || [];
+}
+
+async function renderGroups(body) {
+  await loadGroupsData();
+  const groups = _groupsCache || [];
+  const roster = _allStudentsCache || [];
+
+  // Find students without a group
+  const groupedIds = new Set();
+  groups.forEach(g => (g.members || []).forEach(m => groupedIds.add(m)));
+  const ungrouped = roster.filter(s => !groupedIds.has(s.id));
+
+  let html = '';
+
+  // Existing groups
+  if (groups.length) {
+    html += groups.map(g => {
+      const memberDetails = g.memberDetails || [];
+      return `<div class="group-card">
+        <div class="group-card-header">
+          <h4>👥 ${escapeHtml(g.name)} <span style="font-weight:400;font-size:12px;color:var(--text-tertiary);">（${memberDetails.length}人）</span></h4>
+          <div class="group-actions">
+            <button onclick="renameGroup(${g.id}, '${escapeHtml(g.name)}')">✏️ 重命名</button>
+            <button class="danger" onclick="deleteGroup(${g.id}, '${escapeHtml(g.name)}')">🗑 删除</button>
+          </div>
+        </div>
+        <div class="group-members">
+          ${memberDetails.length ? memberDetails.map(m =>
+            `<span class="group-member-tag">
+              ${escapeHtml(m.username)}
+              <span class="remove-member" onclick="removeMember(${g.id}, '${m.id}', '${escapeHtml(m.username)}')" title="移出小组">×</span>
+            </span>`
+          ).join('') : '<span style="font-size:12px;color:var(--text-tertiary);">暂无成员</span>'}
+        </div>
+        <div class="group-add-member">
+          <select id="select_add_${g.id}">
+            <option value="">选择学生添加...</option>
+            ${ungrouped.map(s => `<option value="${s.id}">${escapeHtml(s.username)}</option>`).join('')}
+          </select>
+          <button onclick="addMemberToGroup(${g.id})">添加</button>
+        </div>
+      </div>`;
+    }).join('');
+  } else {
+    html += '<div class="analysis-empty">暂无小组，请创建第一个小组</div>';
+  }
+
+  // Ungrouped students
+  if (ungrouped.length) {
+    html += `<div class="no-group-students">
+      <h5>⚠️ 未分组学生（${ungrouped.length}人）— 这些学生的词云为个人模式</h5>
+      <div class="student-list">
+        ${ungrouped.map(s => `<span class="group-member-tag" style="background:#fff7ed;">${escapeHtml(s.username)}</span>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  // Create new group
+  html += `<div class="group-create-row">
+    <input type="text" id="newGroupName" placeholder="输入新小组名称..." onkeydown="if(event.key==='Enter')createGroup()">
+    <button onclick="createGroup()">＋ 创建小组</button>
+  </div>`;
+
+  body.innerHTML = html;
+}
+
+async function createGroup() {
+  const input = document.getElementById('newGroupName');
+  if (!input) return;
+  const name = input.value.trim();
+  if (!name) { showToast('请输入小组名称'); return; }
+  const data = await apiCall('POST', '/groups', { name });
+  if (data) {
+    _groupsCache = null; _allStudentsCache = null;
+    showToast('小组「' + name + '」已创建');
+    renderGroups(document.getElementById('dashboardBody'));
+  }
+}
+
+async function renameGroup(groupId, oldName) {
+  const newName = prompt('为「' + oldName + '」输入新名称：', oldName);
+  if (!newName || newName.trim() === oldName || !newName.trim()) return;
+  const data = await apiCall('PUT', '/groups/' + groupId, { name: newName.trim() });
+  if (data) {
+    _groupsCache = null; _allStudentsCache = null;
+    showToast('已重命名为「' + newName.trim() + '」');
+    renderGroups(document.getElementById('dashboardBody'));
+  }
+}
+
+async function deleteGroup(groupId, name) {
+  if (!confirm('确定要删除小组「' + name + '」吗？\n该小组的成员将变为未分组状态。')) return;
+  const data = await apiCall('DELETE', '/groups/' + groupId);
+  if (data && data.ok) {
+    _groupsCache = null; _allStudentsCache = null;
+    showToast('小组「' + name + '」已删除');
+    renderGroups(document.getElementById('dashboardBody'));
+  }
+}
+
+async function addMemberToGroup(groupId) {
+  const select = document.getElementById('select_add_' + groupId);
+  if (!select) return;
+  const userId = select.value;
+  if (!userId) { showToast('请选择学生'); return; }
+  const data = await apiCall('POST', '/groups/' + groupId + '/members', { userId });
+  if (data && data.ok) {
+    _groupsCache = null; _allStudentsCache = null;
+    showToast('已添加成员');
+    renderGroups(document.getElementById('dashboardBody'));
+  }
+}
+
+async function removeMember(groupId, userId, username) {
+  if (!confirm('确定将「' + username + '」移出此小组吗？')) return;
+  const data = await apiCall('DELETE', '/groups/' + groupId + '/members/' + userId);
+  if (data && data.ok) {
+    _groupsCache = null; _allStudentsCache = null;
+    showToast('已将「' + username + '」移出小组');
+    renderGroups(document.getElementById('dashboardBody'));
+  }
+}
+
 // ── Module 1 Interactive Map ──
 function initLeafletMap(mapId) {
   var el = document.getElementById(mapId);
@@ -3535,6 +3933,7 @@ var studioSysTags = [
 
 function openDesignStudio() {
   document.getElementById('studioView').classList.add('open');
+  syncHash();
   document.getElementById('studioTagList').innerHTML = studioSysTags.map(t =>
     `<div class="studio-tag" draggable="false" onclick="studioPlaceLabel('${t.id}')" style="cursor:pointer;">
       <span class="tag-dot" style="background:${t.color};"></span>
@@ -3579,6 +3978,7 @@ function openDesignStudio() {
 
 function closeStudio() {
   document.getElementById('studioView').classList.remove('open');
+  syncHash();
 }
 
 function studioInitCanvas() {
