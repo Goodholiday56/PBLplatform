@@ -38,16 +38,6 @@ http://localhost:8000
 
 教师账号可发布活动、管理班级；学生账号按教师发布的节奏逐活动学习。
 
-## 部署到 Render
-
-1. Fork/克隆本仓库到 GitHub
-2. [Render](https://render.com) → New Web Service → 连接仓库
-3. Runtime: **Node**，Start Command: `node server.js`
-4. 添加环境变量 `DEEPSEEK_API_KEY`
-5. 部署完成，获得 `https://xxx.onrender.com` 地址
-
-> ⚠️ 免费实例 15 分钟无访问会休眠，唤醒约 30 秒。`data/` 目录存 JSON 文件，重新部署会清空。
-
 ## 项目结构
 
 ```
