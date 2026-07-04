@@ -548,6 +548,144 @@
     padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 16px 0;
     font-size: 15px; color: var(--text-secondary);
   }
+
+  /* ── 活动任务卡片行 ── */
+  .activity-cards-row {
+    display: flex; gap: 12px; padding: 8px 0 4px;
+    overflow-x: auto; scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+  .activity-cards-row::-webkit-scrollbar { height: 4px; }
+  .activity-cards-row::-webkit-scrollbar-thumb {
+    background: var(--border); border-radius: 2px;
+  }
+
+  .activity-card {
+    flex: 0 0 auto; min-width: 160px; max-width: 200px;
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    border: 2px solid var(--border-light);
+    background: var(--bg-card);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    user-select: none;
+  }
+  .activity-card:hover {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+  .activity-card.active {
+    border-color: var(--accent);
+    background: var(--accent-light);
+    box-shadow: 0 0 0 3px rgba(26,86,219,0.12);
+  }
+  .activity-card.locked {
+    opacity: 0.5; cursor: not-allowed;
+    background: var(--bg-subtle);
+    filter: grayscale(30%);
+  }
+  .activity-card.locked:hover {
+    border-color: var(--border-light);
+    box-shadow: none;
+    transform: none;
+  }
+  .activity-card .ac-num {
+    font-size: 10px; font-weight: 700; color: var(--accent);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .activity-card.locked .ac-num { color: var(--text-tertiary); }
+  .activity-card .ac-title {
+    font-size: 13px; font-weight: 600; color: var(--text);
+    line-height: 1.35; margin-bottom: 4px;
+  }
+  .activity-card .ac-time {
+    font-size: 11px; color: var(--text-tertiary);
+  }
+  .activity-card .ac-badge {
+    position: absolute; top: 8px; right: 10px;
+    font-size: 10px; padding: 2px 7px; border-radius: 10px;
+    font-weight: 600;
+  }
+  .ac-badge.pub { background: #ecfdf5; color: #0d9488; }
+  .ac-badge.draft { background: #fef3eb; color: #ea5a0c; }
+  .ac-badge.locked-badge { background: var(--bg-subtle); color: var(--text-tertiary); }
+
+  /* 教师发布按钮（卡片底部） */
+  .activity-card .ac-publish-btn {
+    display: block; width: 100%; margin-top: 8px;
+    padding: 4px 0; border-radius: 4px; border: 1px solid var(--border);
+    background: var(--bg-card); font-size: 11px; font-weight: 600;
+    cursor: pointer; font-family: inherit;
+    transition: var(--transition);
+  }
+  .activity-card .ac-publish-btn:hover {
+    background: var(--accent); color: #fff; border-color: var(--accent);
+  }
+  .activity-card .ac-publish-btn.published {
+    background: var(--green-light); color: var(--green); border-color: var(--green);
+  }
+
+  /* ── 活动详情区 ── */
+  .activity-detail {
+    margin-top: 16px;
+    background: var(--bg-card); border: 1px solid var(--border-light);
+    border-radius: var(--radius); padding: 24px;
+    box-shadow: var(--shadow-sm);
+  }
+  .activity-detail .ad-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    margin-bottom: 16px; padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .activity-detail .ad-title {
+    font-size: 16px; font-weight: 700; color: var(--text);
+  }
+  .activity-detail .ad-time {
+    font-size: 12px; color: var(--text-tertiary); white-space: nowrap;
+  }
+  .activity-detail .ad-desc {
+    font-size: 14px; color: var(--text-secondary); line-height: 1.7;
+    margin-bottom: 16px;
+  }
+  .activity-detail .ad-task {
+    background: var(--orange-light); border-left: 3px solid var(--orange);
+    padding: 10px 14px; border-radius: 0 6px 6px 0;
+    font-size: 14px; color: var(--text-secondary); margin-bottom: 16px;
+  }
+  .activity-detail .ad-resources {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-bottom: 16px;
+  }
+  .activity-detail .ad-resource-link {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 6px 12px; border-radius: 16px;
+    background: var(--bg-subtle); font-size: 12px;
+    color: var(--accent); text-decoration: none;
+    transition: var(--transition);
+  }
+  .activity-detail .ad-resource-link:hover {
+    background: var(--accent-light);
+  }
+  .activity-detail .ad-content-blocks {
+    padding-top: 16px; border-top: 2px solid var(--accent-light);
+  }
+  .activity-detail .ad-empty {
+    text-align: center; padding: 40px 20px; color: var(--text-tertiary);
+    font-size: 14px;
+  }
+  .activity-detail .ad-locked {
+    text-align: center; padding: 48px 20px;
+  }
+  .activity-detail .ad-locked .lock-icon {
+    font-size: 40px; margin-bottom: 12px; opacity: 0.5;
+  }
+  .activity-detail .ad-locked p {
+    font-size: 15px; color: var(--text-tertiary);
+  }
+
   .learn-bottom {
     padding: 12px 24px; border-top: 1px solid var(--border-light);
     display: flex; align-items: center; justify-content: space-between;
@@ -2048,6 +2186,7 @@ let curCourse = null;
 let curChapIdx = 0;
 let completedLessons = {};
 let reflections = {};
+let selectedActivity = 0; // 当前选中的活动卡片索引
 
 // ── Auth state ──
 let authToken = localStorage.getItem('pbl_token') || '';
@@ -2571,7 +2710,14 @@ async function updateLearnUI() {
     document.getElementById('learnResourcesBody').innerHTML = '<div class="res-item" style="cursor:default;color:var(--text-tertiary);"><span>本课时暂无配套文件</span></div>';
   }
 
-  const materialsHTML = renderMaterials(curCourse.id, curChapIdx, currentPublishState, isTeacher);
+  // 初始化选中第一个已发布活动（若有）；若无已发布活动则选第一个
+  selectedActivity = 0;
+  if (!isTeacher && currentPublishState.length > 0) {
+    selectedActivity = currentPublishState[0];
+  }
+
+  // 渲染：活动卡片行 + 详情区
+  const content = typeof lessonContent !== 'undefined' ? (lessonContent[matKey] || null) : null;
   document.getElementById('contentZone').innerHTML = `
     <div class="content-card">
       <h3>${ch[curChapIdx].t}</h3>
@@ -2581,10 +2727,8 @@ async function updateLearnUI() {
         <div class="highlight-box">
           <strong>学习目标：</strong>${ch[curChapIdx].desc.split('。')[0]}。
         </div>
-        <div class="task-box">
-          <strong>课堂任务：</strong>${ch[curChapIdx].task}
-        </div>
-        ${materialsHTML ? `<div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border-light);">${materialsHTML}</div>` : ''}
+        ${renderActivityCards(matKey, acts, isTeacher)}
+        ${renderActivityDetail(matKey, selectedActivity, isTeacher)}
         ${curCourse.id === 4 ? `<div style="text-align:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--border-light);"><button class="btn btn-accent" style="font-size:14px;padding:12px 28px;" onclick="openWorkshop('4_${curChapIdx}')">✏️ 进入创作工坊</button><p style="font-size:11px;color:var(--text-tertiary);margin-top:6px;">选择创作方向，在AI辅助下完成你的科技传播作品</p></div>` : ''}
         ${curCourse.id === 2 && curChapIdx === 2 ? `<div style="text-align:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--border-light);"><button class="btn btn-accent" style="font-size:14px;padding:12px 28px;" onclick="openDesignStudio()">🔧 进入设计工作室</button><p style="font-size:11px;color:var(--text-tertiary);margin-top:6px;">绘制机器人设计图，标注五大系统，撰写设计说明</p></div>` : ''}
       </div>
@@ -2593,6 +2737,110 @@ async function updateLearnUI() {
   // 刷新讨论区帖子（保持当前tab不切换）
   if (serverAvailable) loadPosts(curCourse.id + '_' + curChapIdx);
   syncHash();
+}
+
+// ── 活动卡片行渲染 ──
+function renderActivityCards(lessonKey, acts, isTeacher) {
+  if (!acts || !acts.length) return '';
+  const pubSet = new Set(currentPublishState);
+  return `
+    <div style="margin-top:16px;">
+      <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:8px;">📋 活动任务 — 点击卡片查看对应的学习内容</div>
+      ${isTeacher ? `<div class="teacher-toolbar" style="margin-bottom:8px;">
+        <span class="toolbar-hint">已发布 ${currentPublishState.length}/${acts.length} 个活动</span>
+        <button class="btn-sm ghost" onclick="publishAll('${lessonKey}', ${acts.length})">${currentPublishState.length >= acts.length ? '全部取消' : '发布全部'}</button>
+        ${currentPublishState.length > 0 ? `<button class="btn-sm ghost" onclick="unpublishAll('${lessonKey}')">全部取消</button>` : ''}
+      </div>` : ''}
+      <div class="activity-cards-row" id="activityCardsRow">
+        ${acts.map((act, i) => {
+          const isPub = isTeacher || pubSet.has(i);
+          const isActive = i === selectedActivity;
+          const badge = isTeacher ? (isPub ? '<span class="ac-badge pub">已发布</span>' : '<span class="ac-badge draft">未发布</span>') : '';
+          return `
+          <div class="activity-card ${isActive ? 'active' : ''} ${!isPub && !isTeacher ? 'locked' : ''}"
+               ${isPub || isTeacher ? `onclick="selectActivity(${i})"` : ''}
+               title="${isPub || isTeacher ? act.title : '该活动尚未发布'}">
+            <div class="ac-num">活动${i + 1} ${!isPub && !isTeacher ? '🔒' : ''}</div>
+            <div class="ac-title">${act.title}</div>
+            <div class="ac-time">⏱ ${act.time}</div>
+            ${badge}
+            ${isTeacher ? `<button class="ac-publish-btn ${isPub ? 'published' : ''}" onclick="event.stopPropagation();${isPub ? `unpublishOne('${lessonKey}',${i})` : `publishOne('${lessonKey}',${i})`}">${isPub ? '取消发布' : '▶ 发布'}</button>` : ''}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+}
+
+// ── 活动详情区渲染（按选中活动筛选内容块） ──
+function renderActivityDetail(lessonKey, actIdx, isTeacher) {
+  const content = typeof lessonContent !== 'undefined' ? (lessonContent[lessonKey] || null) : null;
+  const activities = typeof lessonActivities !== 'undefined' ? (lessonActivities[lessonKey] || []) : [];
+  const act = activities[actIdx];
+
+  // 活动不存在（如未发布且非教师）
+  if (!act) {
+    return `<div class="activity-detail"><div class="ad-locked"><div class="lock-icon">🔒</div><p>该活动尚未发布，请等待老师开放</p></div></div>`;
+  }
+
+  const pubSet = new Set(currentPublishState);
+  const isPub = isTeacher || pubSet.has(actIdx);
+  if (!isPub) {
+    return `<div class="activity-detail"><div class="ad-locked"><div class="lock-icon">🔒</div><p>活动${actIdx + 1}：等待老师发布</p></div></div>`;
+  }
+
+  // 活动详情头
+  let html = `
+    <div class="activity-detail" id="activityDetail">
+      <div class="ad-header">
+        <div>
+          <div class="ad-title">${act.title}</div>
+          <div style="font-size:11px;color:var(--text-tertiary);margin-top:2px;">⏱ ${act.time}</div>
+        </div>
+        <div class="ad-time">活动${actIdx + 1} / 共${activities.length}个</div>
+      </div>
+      <div class="ad-desc">${act.desc}</div>
+      <div class="ad-task"><strong>📌 课堂任务：</strong>${act.task}</div>`;
+
+  // 配套资源文件
+  if (act.resources && act.resources.length) {
+    html += `<div class="ad-resources"><span style="font-size:11px;color:var(--text-tertiary);margin-right:4px;">📎 配套资源：</span>
+      ${act.resources.map(f => {
+        const name = f.split('/').pop();
+        return `<a href="/${f}" target="_blank" download class="ad-resource-link">📄 ${name}</a>`;
+      }).join('')}
+    </div>`;
+  }
+
+  // 渲染该活动解锁的内容块 — 委托给 renderMaterials 的筛选模式
+  if (content && content.blocks) {
+    const hasMatching = Object.values(content.blocks).some(b => b.gateActivity === actIdx);
+    if (hasMatching) {
+      html += `<div class="ad-content-blocks">`;
+      html += `<div style="font-size:12px;color:var(--accent);font-weight:600;margin-bottom:12px;">📖 配套学习内容</div>`;
+      // 用全部已发布活动作为 published（详情区不受发布限制，能进卡片就能看内容）
+      html += renderMaterials(curCourse.id, curChapIdx, currentPublishState, isTeacher, actIdx);
+      html += `</div>`;
+    } else {
+      html += `<div class="ad-content-blocks"><div class="ad-empty">📭 本活动暂无配套学习内容</div></div>`;
+    }
+  }
+
+  html += `</div>`;
+  return html;
+}
+
+// ── 选中活动卡片 ──
+function selectActivity(idx) {
+  selectedActivity = idx;
+  const lessonKey = curCourse.id + '_' + curChapIdx;
+  // 更新卡片选中态
+  const cards = document.querySelectorAll('.activity-card');
+  cards.forEach((c, i) => c.classList.toggle('active', i === idx));
+  // 更新详情区
+  const detailEl = document.getElementById('activityDetail');
+  if (detailEl) {
+    detailEl.outerHTML = renderActivityDetail(lessonKey, idx, isTeacher);
+  }
 }
 
 function updateAiPrompts() {

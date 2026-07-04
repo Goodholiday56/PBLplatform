@@ -725,7 +725,7 @@ const lessonMaterials = (function() {
 // PART 4: 渲染函数 — 从分离数据源渲染教学资料
 // ═══════════════════════════════════════════════════════════
 
-function renderMaterials(moduleId, lessonIdx, published, isTeacher) {
+function renderMaterials(moduleId, lessonIdx, published, isTeacher, filterActivityIdx) {
   const key = moduleId + '_' + lessonIdx;
   const content = lessonContent[key];
   const activities = lessonActivities[key];
@@ -734,13 +734,16 @@ function renderMaterials(moduleId, lessonIdx, published, isTeacher) {
   published = published || [];
   isTeacher = isTeacher || false;
   const blocks = content ? (content.blocks || {}) : {};
+  // filterActivityIdx: 若传入则仅渲染该活动关联的内容块，且跳过活动列表和地图
+  const filterMode = (filterActivityIdx !== undefined && filterActivityIdx !== null);
 
-  // 判断内容块是否可见（基于 gateActivity）
+  // 判断内容块是否可见（基于 gateActivity + 可选活动筛选）
   function isBlockVisible(blockName) {
     const block = blocks[blockName];
     if (!block) return false;
     const gateIdx = block.gateActivity;
-    if (gateIdx === undefined) return true;
+    if (gateIdx === undefined) return !filterMode; // 无 gate 的块在筛选模式下隐藏
+    if (filterMode && gateIdx !== filterActivityIdx) return false; // 筛选模式：只显示匹配活动
     return isTeacher || published.includes(gateIdx);
   }
 
@@ -767,8 +770,8 @@ function renderMaterials(moduleId, lessonIdx, published, isTeacher) {
     </div>`;
   }
 
-  // ── 教学活动 ──
-  if (activities && activities.length) {
+  // ── 教学活动 ──（筛选模式下跳过，活动卡片已在 contentZone 渲染）
+  if (!filterMode && activities && activities.length) {
     html += `<div class="mat-block">
       <div class="mat-label">📋 教学活动流程</div>`;
     if (isTeacher) {
