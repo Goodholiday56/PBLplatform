@@ -51,6 +51,37 @@ if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
+// 首次启动：自动创建默认教师账号
+(function seedDefaultUsers() {
+  const usersFile = path.join(DATA_DIR, 'users.json');
+  let users = [];
+  try { users = JSON.parse(fs.readFileSync(usersFile, 'utf-8')); } catch {}
+  if (users.length > 0) return;
+
+  const salt1 = crypto.randomBytes(16).toString('hex');
+  const salt2 = crypto.randomBytes(16).toString('hex');
+  users = [
+    {
+      id: crypto.randomUUID(),
+      username: 'teacher',
+      passwordHash: crypto.scryptSync('123456', salt1, 64).toString('hex'),
+      salt: salt1,
+      role: 'teacher',
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: crypto.randomUUID(),
+      username: 'student',
+      passwordHash: crypto.scryptSync('123456', salt2, 64).toString('hex'),
+      salt: salt2,
+      role: 'student',
+      createdAt: new Date().toISOString(),
+    },
+  ];
+  fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), 'utf-8');
+  console.log('[种子数据] 已创建默认账号: teacher/123456 (教师), student/123456 (学生)');
+})();
+
 const MIME = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
