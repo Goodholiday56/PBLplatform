@@ -82,6 +82,27 @@ if (!fs.existsSync(DATA_DIR)) {
   console.log('[种子数据] 已创建默认账号: teacher/123456 (教师), student/123456 (学生)');
 })();
 
+// 首次启动：预发布全部课时活动
+(function seedPublishState() {
+  const pubFile = path.join(DATA_DIR, 'publish_state.json');
+  let pub = {};
+  try { pub = JSON.parse(fs.readFileSync(pubFile, 'utf-8')); } catch {}
+  if (Object.keys(pub).length > 0) return;
+
+  // 12课时 × 每个课时的活动数
+  const allActivities = {
+    '1_0': 3, '1_1': 2, '1_2': 2,
+    '2_0': 3, '2_1': 2, '2_2': 3,
+    '3_0': 2, '3_1': 2, '3_2': 2,
+    '4_0': 4, '4_1': 3, '4_2': 4,
+  };
+  for (const [key, count] of Object.entries(allActivities)) {
+    pub[key] = Array.from({ length: count }, (_, i) => i);
+  }
+  fs.writeFileSync(pubFile, JSON.stringify(pub, null, 2), 'utf-8');
+  console.log('[种子数据] 已预发布全部 12 课时活动');
+})();
+
 const MIME = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
