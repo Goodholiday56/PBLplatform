@@ -8,8 +8,6 @@
 
 🌐 **平台地址**：[https://pblplatform.onrender.com](https://pblplatform.onrender.com)
 
-📂 **GitHub**：[Goodholiday56/PBLplatform](https://github.com/Goodholiday56/PBLplatform)
-
 | 角色 | 用户名 | 密码 |
 |------|--------|------|
 | 教师 | `teacher` | `123456` |
